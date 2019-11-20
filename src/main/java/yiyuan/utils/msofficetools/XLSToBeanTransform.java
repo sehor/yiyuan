@@ -12,7 +12,6 @@ public interface XLSToBeanTransform<T> {
     public void creatBeanViaRow(T t,Map<Integer, Field> ColumnIndexfieldNameMap);
     public Map<Integer,Field> createFieldsMap(String[] sheetHeadsString);
     public Map<Integer,Field> createFieldsMap();
-    public int beginRowIndex();
     public List<T> creatBeans(int sheetIndex);
 
 }

@@ -19,7 +19,7 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
     public final static int DEFAULT_BEGIN_DATA_ROW = 1;
     public final static int DEFAULT_BEGIN_COLUMN = 0;
     public final static int DEFAULT_HEAD_ROW = 0;
-    public final static int DEFAULT_SHEET_INDEX = 0;
+    public final static int DEFAULT_SHEET_INDEX = 32;
     private T t;
     private List<Field> allFields;
     private XSSFWorkbook workbook;
@@ -55,12 +55,6 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
     @Override
     public Map<Integer, Field> createFieldsMap() {
         return createFieldsMap(createSheetHeadsNames());
-    }
-
-
-    @Override
-    public int beginRowIndex() {
-        return DEFAULT_BEGIN_DATA_ROW;
     }
 
 
