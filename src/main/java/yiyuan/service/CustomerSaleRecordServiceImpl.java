@@ -29,7 +29,7 @@ public class CustomerSaleRecordServiceImpl implements CustomerSaleRecordService 
 		for (int i = 0; i < saleRecords.size(); i++) {
 			if (i > 0 && !saleRecords.get(i).get公司名称().equals(saleRecords.get(i - 1).get公司名称())) {
 				CustomerSaleRecord csr = new CustomerSaleRecord();
-				csr.setSaleRecords(tempRecords);
+				csr.setSaleRecords(new ArrayList<SaleRecord>(tempRecords)); //必须要克隆的形式
 				csr.setCustomer(getCustomerByName(saleRecords.get(i - 1).get公司名称()));
 				customerSaleRecords.add(csr);
 				tempRecords.clear();
@@ -43,7 +43,7 @@ public class CustomerSaleRecordServiceImpl implements CustomerSaleRecordService 
 		// 处理最后一条记录
 
 		CustomerSaleRecord csr1 = new CustomerSaleRecord();
-		csr1.setSaleRecords(tempRecords);
+		csr1.setSaleRecords(new ArrayList<SaleRecord>(tempRecords));
 		csr1.setCustomer(getCustomerByName(saleRecords.get(saleRecords.size() - 1).get公司名称()));
 		customerSaleRecords.add(csr1);
 
@@ -59,7 +59,11 @@ public class CustomerSaleRecordServiceImpl implements CustomerSaleRecordService 
 				return customer;
 			}
 		}
-		return null;
+		Customer customer=new Customer();
+		customer.set名称(name);
+		customer.set地址电话("地址（未找到） 电话（未找到）");
+		customer.set纳税编号("未找到");
+		return customer;
 	}
 
 }

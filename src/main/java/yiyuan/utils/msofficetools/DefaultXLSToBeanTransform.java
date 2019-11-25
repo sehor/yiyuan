@@ -12,14 +12,14 @@ import org.springframework.stereotype.Component;
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.util.*;
 import java.util.Map.Entry;
-
 public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
     public final static int DEFAULT_BEGIN_DATA_ROW = 1;
     public final static int DEFAULT_BEGIN_COLUMN = 0;
     public final static int DEFAULT_HEAD_ROW = 0;
-    public final static int DEFAULT_SHEET_INDEX = 32;
+    public final static int DEFAULT_SHEET_INDEX = 0;
     private T t;
     private List<Field> allFields;
     private XSSFWorkbook workbook;
@@ -71,10 +71,10 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
     public List<T> creatBeans(int sheetIndex) {
         List<T> beans = new ArrayList<>();
         XSSFSheet sheet = this.workbook.getSheetAt(sheetIndex);
-
+        System.out.println(sheet.getSheetName());
         for (int i = DEFAULT_BEGIN_DATA_ROW; i < sheet.getPhysicalNumberOfRows(); i++) {
             XSSFRow row = sheet.getRow(i);
-            if (row != null&&row.getCell(1)!=null&&row.getCell(2)!=null) {
+            if (row != null && row.getCell(1) != null && row.getCell(2) != null) {
                 beans.add(creatBeanViaRow(row));
             }
         }
@@ -125,7 +125,7 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
 
     private String[] createSheetHeadsNames() {
         XSSFSheet sheet = this.workbook.getSheetAt(DEFAULT_SHEET_INDEX);
-        System.out.println("sheet name is" + sheet.getSheetName());
+        //System.out.println("sheet name is" + sheet.getSheetName());
         XSSFRow headRow = sheet.getRow(DEFAULT_HEAD_ROW);
         String[] sheetHeadsNames = null;
 
@@ -154,14 +154,31 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
             else if (field.getType() == Date.class) {
                 field.set(t, new SimpleDateFormat("yyyy-MM-dd").parse(value));
             } else if (field.getType() == Integer.class) {
-
-                field.set(t, (int) Math.rint(Double.valueOf(value))); //有小数点的字符串，四舍五入
+                if (value.isEmpty()) {
+                    field.set(t, 0);
+                } else {
+                    field.set(t, (int) Math.rint(Double.valueOf(value)));
+                }
+                ; //有小数点的字符串，四舍五入
             } else if (field.getType() == Float.class) {
-                field.set(t, Float.valueOf(value));
+                if (value.isEmpty()) {
+                    field.set(t, 0.00F);
+                } else
+                    field.set(t, Float.valueOf(value));
             } else if (field.getType() == Double.class) {
-                field.set(t, Double.valueOf(value));
+                if (value.isEmpty()) {
+                    field.set(t, 0.00D);
+                } else {
+                    field.set(t, Double.valueOf(value));
+                }
+
             } else if (field.getType() == Long.class) {
+                if (value.isEmpty()) {
+                    field.set(t, 0);
+                }
                 field.set(t, (long) Math.rint(Double.valueOf(value)));
+            } else if (field.getType() == LocalDate.class) {
+                field.set(t, LocalDate.parse(value));
             }
         } catch (IllegalAccessException | ParseException e) {
             e.printStackTrace();

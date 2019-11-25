@@ -13,24 +13,32 @@ import java.util.List;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 
 import yiyuan.domain.Customer;
+import yiyuan.domain.CustomerSaleRecord;
 import yiyuan.domain.SaleRecord;
+import yiyuan.service.CustomerSaleRecordService;
 import yiyuan.service.CustomerService;
 import yiyuan.service.SaleRecordService;
+import yiyuan.service.YiyuanService;
 import yiyuan.utils.msofficetools.DefaultXLSToBeanTransform;
 
 
-@RestController("/")
+@RestController
 public class welcomeController {
 @Autowired
 	SaleRecordService saleRecordService;
 @Autowired
 	CustomerService customerService;
+@Autowired
+	CustomerSaleRecordService customerSaleRecordService;
+@Autowired
+	YiyuanService yiyuanService;
 	
-	@GetMapping
+	@GetMapping("/welcome")
 	String welcome() {
 		return "welcome";
 	}
@@ -47,5 +55,27 @@ public class welcomeController {
 	List<Customer> getAllCustomers(){
 		File file=new File("D:\\temp\\客户开票信息表.xlsx");
 		return customerService.getAllCustomers(file);
+	}
+
+	@GetMapping("/customerSaleRecords")
+	List<CustomerSaleRecord> getCustomerSaleRecords() throws IOException, ParseException {
+
+		return customerSaleRecordService.getCustomerSaleRecords(getAllSaleRecords());
+	}
+
+	@GetMapping("/createContractFiles")
+	String createContractXLSXFiles() throws IOException {
+		System.out.println("begin to create files....");
+		String saleFilePath="D:\\temp\\开票要求.xlsx";
+		String contractFilePath="D:\\temp\\微电能开票购销合同样版1.xls";
+		String savePath="D:\\temp\\contract";
+		LocalDate date=LocalDate.parse("2018-01-26");
+		int beginSheetIndex=20;
+		for(int i=0;i<12;i++){
+
+			yiyuanService.createContractFile(saleFilePath,contractFilePath,savePath,date.plusMonths(i),beginSheetIndex+i);
+		}
+		//yiyuanService.createContractFile(saleFilePath,contractFilePath,savePath);
+		return "begin to create files...";
 	}
 }

@@ -25,6 +25,8 @@ public class SaleRecordServiceImpl implements SaleRecordService{
             workbook=new XSSFWorkbook(inputStream);
             XLSToBeanTransform<SaleRecord> xf=new DefaultXLSToBeanTransform<>(new SaleRecord(),workbook);
             saleRecords=xf.creatBeans(sheetIndex);
+            if(saleRecords.size()<=0) return saleRecords;
+
             for(int i=0;i<saleRecords.size();i++){
                 if(saleRecords.get(i).get公司名称().equals("")&&i>0){
                     saleRecords.get(i).set公司名称(saleRecords.get(i-1).get公司名称());
@@ -53,13 +55,6 @@ public class SaleRecordServiceImpl implements SaleRecordService{
     @Override
     public List<SaleRecord> getSaleRecordsFromXLXS(File file, int sheetIndex, LocalDate date) {
         List<SaleRecord> saleRecords=getSaleRecordsFromXLXS(file,sheetIndex);
-        double sum1=0;
-        int sum2=0;
-        for(int i=0;i<saleRecords.size();i++){
-            sum1+=saleRecords.get(i).get含税金额();
-            sum2+=saleRecords.get(i).get数量();
-        }
-        System.out.println("总金额："+sum1+"； 总数量："+sum2);
         saleRecords.forEach(r-> r.setDate(date));
         return saleRecords;
     }
