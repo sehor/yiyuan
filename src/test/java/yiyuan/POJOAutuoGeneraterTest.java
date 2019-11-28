@@ -29,13 +29,19 @@ public class POJOAutuoGeneraterTest {
 
     */
 
-        AutoJOPO autoJOPO = new AutoJOPO("bankList", "yiyuan.bankList");
+        AutoJOPO autoJOPO = new AutoJOPO("AccEntryItem", "yiyuan.core.accEntryItem","mongo");
         autoJOPO
-                .addField("private", "Integer", "id")
-                .addField("private", "String", "brief")
-                .addField("private", "String", "relateAccount")
-                .addField("private", "Float", "income")
+                .addField("private", "String", "id")
+                .addField("private", "String", "EntryId")
+                .addField("private", "int", "queueNum")
+                //.addField("private", "String", "parentId")
                 .addField("private", "LocalDate", "date")
+                .addField("private", "String", "brief")
+                .addField("private","String","AccClaId")
+                .addField("private","Float","debit")
+                .addField("private","Float","credit")
+                .addField("private","String","creatorId")
+
                 .buildFiles();
 
         //System.out.println(beanString);

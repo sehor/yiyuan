@@ -11,6 +11,7 @@ public class AutoJOPO {
     private String packagePath;
     private String filePath;
     private String originName;//第一个字母小写
+    private String databaseType;
     private List<Field> fields = new ArrayList<>();
 
     private final String newLine = "\r\n";
@@ -41,14 +42,17 @@ public class AutoJOPO {
     }
 
     public String buildRepositoryFile() throws IOException {
+        String repositoryName=this.databaseType.equals("mysql")?"JpaRepository":"MongoRepository";  //depend on which database you want to use
         StringBuilder repositoryFileString = new StringBuilder();
+
         repositoryFileString.append("package " + this.packagePath + ";" + newLine);
-        repositoryFileString.append("import org.springframework.data.jpa.repository.JpaRepository;" + newLine +
+        repositoryFileString.append(
                 "import org.springframework.stereotype.Repository;" + newLine
         );
 
+
         repositoryFileString.append("@Repository" + newLine);
-        repositoryFileString.append("public interface " + this.beanName + "Repository extends JpaRepository<" + this.beanName + "," + getIdType() + ">," +
+        repositoryFileString.append("public interface " + this.beanName + "Repository extends " +repositoryName+"<" + this.beanName + "," + getIdType() + ">," +
                 this.beanName + "DataHelper {" + newLine);
 
         repositoryFileString.append("}");
@@ -101,16 +105,6 @@ public class AutoJOPO {
         stringBuilder.append("@Autowired" + newLine);   //add default service interface
         stringBuilder.append(this.beanName + "Service" + " service;" + newLine + newLine); //add default service interface
 
-        // add example method
-        stringBuilder.append("@ApiOperation(value = \"example\",notes = \"this is a example\")" + newLine);
-        stringBuilder.append("@ApiResponse(message = \"访问成功\",code = 200)" + newLine);
-        stringBuilder.append("@ApiImplicitParam(value= \"str\",type = \"path\",required = false,name = \"path variable\")" + newLine);
-        stringBuilder.append("@GetMapping(\"/example/{str}\")" + newLine);
-        stringBuilder.append("public String example(@PathVariable(value = \"str\") String str) { " + newLine +
-
-                " return \"你好，\"" + "+ str;" + newLine +
-                " }" + newLine);
-
 
         // add some default apis:  
 
@@ -123,7 +117,7 @@ public class AutoJOPO {
 
         //get one by id
         stringBuilder.append("    @GetMapping(\"/get/{id}\")\n" +
-                "    public "+this.beanName+" get"+this.beanName+"(@PathVariable(value = \"id\") Integer id){\n" +
+                "    public "+this.beanName+" get"+this.beanName+"(@PathVariable(value = \"id\")" +getIdType()+ " id){\n" +
                 "      return service.get"+this.beanName+"(id);\n" +
                 "    }" + newLine);
 
@@ -136,7 +130,7 @@ public class AutoJOPO {
         
         //delete one by id
         stringBuilder.append("    @DeleteMapping(\"/delete/{id}\")\n" +
-                "   public String delete(@PathVariable(\"id\") Integer id){\n" +
+                "   public String delete(@PathVariable(\"id\") "+getIdType()+" id){\n" +
                 "\n" +
                 "      service.delete"+this.beanName+"(id);\n" +
                 "      return \"delete "+this.originName+" by id :\" +id;\n" +
@@ -150,6 +144,7 @@ public class AutoJOPO {
         return stringBuilder.toString();
     }
 
+
     public String buildBeanFile() throws IOException {
         StringBuilder sb = new StringBuilder();
         sb.append("package " + packagePath + ";" + newLine); //写包路径
@@ -158,16 +153,16 @@ public class AutoJOPO {
         sb.append(
                 "import io.swagger.annotations.ApiModel;" +
                         "import io.swagger.annotations.ApiModelProperty;" +
-                        "import org.springframework.stereotype.Component;" +
+                        //"import org.springframework.stereotype.Component;" +
                         "import javax.persistence.*;"
         );
 
         if (isEntity) {
-            sb.append("@Entity" + newLine);
+            sb.append(this.databaseType.equals("mysql")?"@Entity":"@Document" + newLine);
             sb.append("@Table(name = \"" + this.originName + "\")" + newLine);
         }
 
-        sb.append("@Component" + newLine);
+        //sb.append("@Component" + newLine);
         sb.append("@ApiModel(value=" + nio + ",description=" + nio + ")" + newLine); //add swagger api inno
 
         sb.append("public class " + this.beanName + " {" + newLine);
@@ -226,10 +221,10 @@ public class AutoJOPO {
                 " {" + newLine);
 
         stringBuilder.append("" + this.beanName + " add" + this.beanName + "(" + this.beanName + " " + this.originName + ");" + newLine);
-        stringBuilder.append("" + this.beanName + " get" + this.beanName + "(Integer id);" + newLine);
+        stringBuilder.append("" + this.beanName + " get" + this.beanName + "("+getIdType()+" id);" + newLine);
         stringBuilder.append("" + this.beanName + " update" + this.beanName + "(" + this.beanName + " " + this.originName + ");" + newLine);
         stringBuilder.append("void delete" + this.beanName + "(" + this.beanName + " " + this.originName + ");" + newLine);
-        stringBuilder.append("void delete" + this.beanName + "(Integer id);" + newLine);
+        stringBuilder.append("void delete" + this.beanName + "("+getIdType()+" id);" + newLine);
 
         stringBuilder.append("}");
 
@@ -260,7 +255,7 @@ public class AutoJOPO {
 
         // get by id
         stringBuilder.append("    @Override\n" +
-                "    public " + this.beanName + " get" + this.beanName + "(Integer id) {\n" +
+                "    public " + this.beanName + " get" + this.beanName + "("+getIdType()+" id) {\n" +
                 "        return repository.findById(id).get();\n" +
                 "    }" + newLine);
 
@@ -278,7 +273,7 @@ public class AutoJOPO {
 
         //delete by id
         stringBuilder.append("    @Override\n" +
-                "    public void delete" + this.beanName + "(Integer id) {\n" +
+                "    public void delete" + this.beanName + "("+getIdType()+" id) {\n" +
                 "        repository.deleteById(id);\n" +
                 "    }" + newLine);
 
@@ -372,10 +367,11 @@ public class AutoJOPO {
 
     }
 
-    public AutoJOPO(String beanName, String packagePath) {
+    public AutoJOPO(String beanName, String packagePath,String databaseType) {
         this.beanName = beanName.substring(0, 1).toUpperCase() + beanName.substring(1);
         this.originName=beanName.substring(0, 1).toLowerCase() + beanName.substring(1);
         this.packagePath = packagePath;
         this.filePath = getFilePath();
+        this.databaseType=databaseType.toLowerCase();
     }
 }
