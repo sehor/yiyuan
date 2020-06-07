@@ -27,4 +27,7 @@ public interface ClassficationService {
 	List<Classfication> getAll();
 	
 	public String getNumber(String name,String companyName,String rootName);
+	
+	public List<Classfication> getAllByName(String name,String companyName);
+	public String getNumber(List<Classfication> classfications,String companyName,String rootAccountName);
 }

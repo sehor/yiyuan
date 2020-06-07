@@ -25,7 +25,9 @@ props:
 
      bankSalary: 工资
        
-     bankExpense: 报销  
+     bankExpense: 报销 
+     
+     bankInterest: 结息 
               
   companies:
      YYKJ: 

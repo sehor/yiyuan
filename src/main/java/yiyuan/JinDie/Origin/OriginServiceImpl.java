@@ -5,6 +5,8 @@ import java.util.List;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import yiyuan.JinDie.Classification.Classfication;
+
 @Service
 public class OriginServiceImpl implements OriginService {
 @Autowired
@@ -54,5 +56,6 @@ OriginRepository repository;
 		return repository.deleteByCompanyName(companyName);
 	}
 	
+
 	
 }

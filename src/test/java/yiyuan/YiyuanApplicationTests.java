@@ -28,6 +28,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import yiyuan.JinDie.OriginType;
 import yiyuan.JinDie.Classification.Classfication;
 import yiyuan.JinDie.Classification.ClassficationRepository;
+import yiyuan.JinDie.Classification.ClassficationService;
 import yiyuan.JinDie.Origin.Origin;
 import yiyuan.JinDie.Origin.OriginService;
 import yiyuan.other.FileStructure;
@@ -50,7 +51,8 @@ public class YiyuanApplicationTests {
 	@Autowired
 	OriginService originService;
 	
-
+    @Autowired
+    ClassficationService claService;
 	//@Test
 	public void contextLoads() {
 	}
@@ -114,8 +116,15 @@ public class YiyuanApplicationTests {
 	@Test
 	public void test3() {
       
-	  System.out.println(companyPro.getKeyword().get("bankFee").contains("收费"));
-		 
+	  List<Classfication> classfications=claService.getAllByName("郑茂", "CHKJ");
+	  
+	  String number=claService.getNumber(classfications, "CHKJ", "其他应收");
+		 pt("number:------>"+number);
 		
+	}
+	
+	
+	private void pt(Object o) {
+		System.out.println(o.toString());
 	}
 }

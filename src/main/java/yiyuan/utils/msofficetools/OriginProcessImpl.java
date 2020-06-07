@@ -120,7 +120,6 @@ public class OriginProcessImpl implements OriginProcess {
 					origin.setType(OriginType.Bank_Pay_Salary.value);
 				} else if (origin.getBrief().contains("报销")) { // 报销，默认其他应付账款-法人
 					origin.setType(OriginType.Bank_Pay_Expensive.value);
-					
 				}
 
 				else if (origin.getBrief().contains("缴税") || origin.getBrief().contains("协议扣税")) { // 缴税
@@ -695,7 +694,9 @@ public class OriginProcessImpl implements OriginProcess {
 
 			// 相同type-->
 			List<Origin> sameTypeList = new ArrayList<>();
-			sameTypeList = origins.stream().filter(e -> e.getType().contains(type.value)&&!e.getType().contains("Tax")).collect(Collectors.toList());  //税款不汇总
+			sameTypeList = origins.stream()
+					.filter(e -> e.getType().contains(type.value) && !e.getType().contains("Tax"))
+					.collect(Collectors.toList()); // 税款不汇总
 			if (sameTypeList.size() > 0) {
 
 				Map<String, Origin> map = new HashMap<>(); // 存储相同relative_account的origin
@@ -718,6 +719,42 @@ public class OriginProcessImpl implements OriginProcess {
 				}
 			}
 			// <----相同type
+		}
+
+		return origins;
+	}
+
+	/*
+	 * 设置bank origin的相关科目，和明细Type
+	 */
+	private List<Origin> preHandleBankOrigin(List<Origin> origins) {
+
+		String num;
+		for (Origin origin : origins) {
+			if (!origin.getType().contains("Bank")) {
+				continue;
+			}
+			origin.setAmout(origin.getBank_income() + origin.getBank_pay());
+			origin.setBrief(origin.getBank_brief1()+" "+origin.getBank_brief2());
+			List<Classfication> classfications = classficationService.getAllByName(origin.getRelative_account(),
+					this.companyName);
+
+			// bank income
+			if (origin.getBank_income() >= 0.01) {
+				if ((num = classficationService.getNumber(classfications, companyName, "应收账款")) != null) {
+					origin.setType(OriginType.Bank_Income_Receivable.value);
+					origin.setRelative_account_number(num);
+				} else if ((num = classficationService.getNumber(classfications, companyName, "其他应收款")) != null) {
+					origin.setType(OriginType.Bank_Income_Receivable.value);
+					origin.setRelative_account_number(num);
+				}else if ((num = classficationService.getNumber(classfications, companyName, "其他应付款")) != null) {
+					origin.setType(OriginType.Bank_Income_Other.value);
+					origin.setRelative_account_number(num);
+				}else if (origin.getBrief().contains(companyProperties.getKeyword().get("bankInterest"))) {
+					origin.setType(OriginType.Bank_Income_Other.value);
+					origin.setRelative_account_number(num);
+				}
+			}
 		}
 
 		return origins;
