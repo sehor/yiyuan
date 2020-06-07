@@ -1,0 +1,54 @@
+config-1-attributes:
+  value: 345                          #对应单个值
+  valueArray: 1,2,3,4,5,6,7,8,9      #对应数组
+  valueList:                         #对应list
+    -13579
+    -246810
+  valueMap:                          #对应map
+    name: lili
+    age: 20
+    sex: 男
+  valueMapList:                      #对应list<map>
+    - name: bob
+      age: 21
+    - name: caven
+      age: 31
+
+props:
+
+  Keyword:
+     bankTax: 协议扣税|缴税
+       
+     bankFee: 手续费|收费项目|短信服务费
+
+     bankSecurity: 社保|社会保险
+
+     bankSalary: 工资
+       
+     bankExpense: 报销  
+              
+  companies:
+     YYKJ: 
+        name: 深圳市宜源科技有限公司
+        cost: 140501
+        cj: 222108
+        jyf: 222113
+        dfjyf: 222114
+        yfgz: 221101
+         
+     AOKJ: 
+        name: 深圳市安欧科技有限公司 
+        cost: 520201
+        cj: 222103
+        jyf: 222104
+        dfjyf: 222105
+        yfgz: 221101
+        
+     CHKJ: 
+        name: 深圳市创和技术有限公司 
+        cost: 140501
+        cj: 222108
+        jyf: 222113
+        dfjyf: 222114
+        yfgz: 221101
+      

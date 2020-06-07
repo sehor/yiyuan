@@ -1,18 +1,15 @@
 package yiyuan.utils.msofficetools;
 
-import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.springframework.stereotype.Component;
-
-
 import java.lang.reflect.Field;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.Map.Entry;
 public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
@@ -21,9 +18,9 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
     public final static int DEFAULT_HEAD_ROW = 0;
     public final static int DEFAULT_SHEET_INDEX = 0;
     private T t;
-    private List<Field> allFields;
+    private List<Field> allFields; //bean's fields
     private XSSFWorkbook workbook;
-    private Map<Integer, Field> fieldIndexMap;
+    private Map<Integer, Field> fieldIndexMap;  
 
     @Override
     public void creatBeanViaRow(T t, Map<Integer, Field> ColumnIndexfieldNameMap) {
@@ -57,6 +54,8 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
         return createFieldsMap(createSheetHeadsNames());
     }
 
+    
+    
 
     public DefaultXLSToBeanTransform(T t, XSSFWorkbook workbook) {
         this.t = t;
@@ -71,7 +70,7 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
     public List<T> creatBeans(int sheetIndex) {
         List<T> beans = new ArrayList<>();
         XSSFSheet sheet = this.workbook.getSheetAt(sheetIndex);
-        System.out.println(sheet.getSheetName());
+       // System.out.println(sheet.getSheetName());
         for (int i = DEFAULT_BEGIN_DATA_ROW; i < sheet.getPhysicalNumberOfRows(); i++) {
             XSSFRow row = sheet.getRow(i);
             if (row != null && row.getCell(1) != null && row.getCell(2) != null) {
@@ -86,15 +85,13 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
         try {
             T t1 = (T) this.t.getClass().newInstance();  //通过反射新建一个T类型的实例
 
-            int cellsNumb = row.getPhysicalNumberOfCells();
-
             for (Entry<Integer, Field> entry : this.fieldIndexMap.entrySet()) {
                 XSSFCell cell = row.getCell(entry.getKey());
                 if (cell != null) {
 
                     cell.setCellType(CellType.STRING);
                     String cellvalue = (cell.getStringCellValue() != null ? cell.getStringCellValue() : "");
-                    //System.out.println("cell value is: " + cellvalue);
+                   
                     setFieldsValue(t1, entry.getValue(), cellvalue);
                 }
             }
@@ -152,7 +149,11 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
             if (field.getType() == String.class)
                 field.set(t, value);
             else if (field.getType() == Date.class) {
-                field.set(t, new SimpleDateFormat("yyyy-MM-dd").parse(value));
+
+                
+              field.set(t, new SimpleDateFormat("yyyy-MM-dd").parse(value));
+				
+                      
             } else if (field.getType() == Integer.class) {
                 if (value.isEmpty()) {
                     field.set(t, 0);
@@ -178,7 +179,15 @@ public class DefaultXLSToBeanTransform<T> implements XLSToBeanTransform<T> {
                 }
                 field.set(t, (long) Math.rint(Double.valueOf(value)));
             } else if (field.getType() == LocalDate.class) {
-                field.set(t, LocalDate.parse(value));
+            	
+            	
+                try {
+					field.set(t, LocalDate.parse(value));
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					field.set(t, LocalDate.parse(value,DateTimeFormatter.ofPattern("yyyyMMdd")));
+				}
+                
             }
         } catch (IllegalAccessException | ParseException e) {
             e.printStackTrace();

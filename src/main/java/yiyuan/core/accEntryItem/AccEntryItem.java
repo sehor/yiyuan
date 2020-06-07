@@ -36,6 +36,9 @@ public class AccEntryItem {
     private String AccClaId;
 
 
+    private String AccClaNum;
+    
+    
     @ApiModelProperty(value = "")
     private Float debit;
 
@@ -119,4 +122,12 @@ public class AccEntryItem {
     public String getCreatorId() {
         return this.creatorId;
     }
+
+	public String getAccClaNum() {
+		return AccClaNum;
+	}
+
+	public void setAccClaNum(String accClaNum) {
+		AccClaNum = accClaNum;
+	}
 }

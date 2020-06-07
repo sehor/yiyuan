@@ -90,6 +90,7 @@ public class DefaultBeansToXLSTransform<T> implements BeansToXLSTransform {
                     } else if (type == Long.class) {
                         cell.setCellValue((Long) value);
                     } else if (type == Double.class) {
+         
                         cell.setCellValue((Double) value);
                     } else if (type == Float.class) {
                         cell.setCellValue((Float) value);

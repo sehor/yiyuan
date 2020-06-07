@@ -29,18 +29,25 @@ public class POJOAutuoGeneraterTest {
 
     */
 
-        AutoJOPO autoJOPO = new AutoJOPO("AccEntryItem", "yiyuan.core.accEntryItem","mongo");
+        AutoJOPO autoJOPO = new AutoJOPO("JinDieRecord", "yiyuan.JinDie.JinDieRecord","mongo");
         autoJOPO
                 .addField("private", "String", "id")
-                .addField("private", "String", "EntryId")
-                .addField("private", "int", "queueNum")
-                //.addField("private", "String", "parentId")
-                .addField("private", "LocalDate", "date")
-                .addField("private", "String", "brief")
-                .addField("private","String","AccClaId")
-                .addField("private","Float","debit")
-                .addField("private","Float","credit")
-                .addField("private","String","creatorId")
+                .addField("private", "LocalDate", "日期")
+                .addField("private", "String", "凭证字")
+                .addField("private", "Integer", "凭证号")
+                .addField("private", "Integer", "分录序号")
+                .addField("private", "String", "摘要")
+                .addField("private", "String", "科目代码")
+                .addField("private", "Float", "借方金额")
+                .addField("private", "Float", "贷方金额")
+                
+				/*
+				 * .addField("private", "String", "parentId") .addField("private", "LocalDate",
+				 * "date") .addField("private", "String", "brief")
+				 * .addField("private","String","AccClaId") .addField("private","Float","debit")
+				 * .addField("private","Float","credit")
+				 * .addField("private","String","creatorId")
+				 */
 
                 .buildFiles();
 

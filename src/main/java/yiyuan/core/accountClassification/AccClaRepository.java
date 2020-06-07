@@ -8,4 +8,7 @@ import java.util.List;
 @Repository
 public interface AccClaRepository extends MongoRepository<AccCla, String>, AccClaDataHelper {
     List<AccCla> findByParentId(String parentId);
+    AccCla findByNameZh(String nameZh);
+    List<AccCla> findAll();
+    void deleteByNumber(String number);
 }

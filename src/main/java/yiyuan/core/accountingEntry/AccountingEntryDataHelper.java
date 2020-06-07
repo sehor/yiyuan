@@ -1,4 +1,4 @@
-package yiyuan.accountingEntry;
+package yiyuan.core.accountingEntry;
 
 public interface AccountingEntryDataHelper {
 }

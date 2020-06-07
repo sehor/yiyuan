@@ -1,0 +1,27 @@
+{"properties": [
+  {
+    "name": "company.key1",
+    "type": "java.lang.String",
+    "description": "A description for 'company.key1'"
+  },
+  {
+    "name": "company.name",
+    "type": "java.lang.String",
+    "description": "A description for 'company.name'"
+  },
+  {
+    "name": "company-list",
+    "type": "java.lang.String",
+    "description": "A description for 'company-list'"
+  },
+  {
+    "name": "config-attributes",
+    "type": "java.lang.String",
+    "description": "A description for 'config-attributes'"
+  },
+  {
+    "name": "fuck",
+    "type": "java.lang.String",
+    "description": "A description for 'fuck'"
+  }
+]}

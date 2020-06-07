@@ -7,7 +7,10 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Document
 @ApiModel(value = "", description = "")
@@ -16,9 +19,20 @@ public class AccCla {
     @ApiModelProperty(value = "")
     private String id;
 
+    private String number;
 
     @ApiModelProperty(value = "")
     private String name;
+
+    private String nameZh;
+
+    private String forIndustry;
+
+    private String level;
+
+    private Map<String,String> categories=new HashMap<>();
+
+
 
 
     @ApiModelProperty(value = "")
@@ -26,7 +40,7 @@ public class AccCla {
 
 
     @ApiModelProperty(value = "")
-    private List<String> children;
+    private List<String> children=new ArrayList<>();
 
 
     @ApiModelProperty(value = "")
@@ -36,6 +50,50 @@ public class AccCla {
     @ApiModelProperty(value = "")
     private Object otherInfo;
 
+
+
+
+
+    public String getNameZh() {
+        return nameZh;
+    }
+
+    public void setNameZh(String nameZh) {
+        this.nameZh = nameZh;
+    }
+
+    public String getForIndustry() {
+        return forIndustry;
+    }
+
+
+    public void setForIndustry(String forIndustry) {
+        this.forIndustry = forIndustry;
+    }
+
+    public String getLevel() {
+        return level;
+    }
+
+    public void setLevel(String level) {
+        this.level = level;
+    }
+
+    public Map<String, String> getCategories() {
+        return categories;
+    }
+
+    public void setCategories(Map<String, String> categories) {
+        this.categories = categories;
+    }
+
+    public String getNumber() {
+        return number;
+    }
+
+    public void setNumber(String number) {
+        this.number = number;
+    }
 
     public void setId(String id) {
         this.id = id;

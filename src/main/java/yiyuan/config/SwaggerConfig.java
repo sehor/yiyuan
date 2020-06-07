@@ -36,7 +36,8 @@ public class SwaggerConfig {
         return input -> declaringClass(input).transform(handlerPackage(basePackage)).or(true);
     }
 
-    private static Optional<? extends Class<?>> declaringClass(RequestHandler input) {
+    @SuppressWarnings("deprecation")
+	private static Optional<? extends Class<?>> declaringClass(RequestHandler input) {
         return Optional.fromNullable(input.declaringClass());
     }
 

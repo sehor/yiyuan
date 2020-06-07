@@ -14,9 +14,7 @@
 	<name>yiyuan</name>
 	<description>paperwork</description>
 
-<!--	<properties>
-		<java.version>1.8</java.version>
-	</properties>-->
+
 
 
 	<dependencies>
@@ -55,18 +53,18 @@
 			<scope>test</scope>
 		</dependency>
 		
-		      <!--poi-->
+		      
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi</artifactId>
-            <version>4.1.0</version>
+            <version>4.1.2</version>
         </dependency>
 
 
         <dependency>
             <groupId>org.apache.poi</groupId>
             <artifactId>poi-ooxml</artifactId>
-            <version>4.1.0</version>
+            <version>4.1.2</version>
         </dependency>
 
 		<!--swagger2 -->
@@ -86,13 +84,29 @@
 			<version>2.9.2</version>
 		</dependency>
 		
-	</dependencies>
+		
+        <dependency>
+            <groupId>org.junit.jupiter</groupId>
+            <artifactId>junit-jupiter</artifactId>
+            <version>RELEASE</version>
+            <scope>compile</scope>
+        </dependency>
+
+    </dependencies>
 
 	<build>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<configuration>
+					<source>10</source>
+					<target>10</target>
+				</configuration>
 			</plugin>
 		</plugins>
 	</build>

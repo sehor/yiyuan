@@ -4,6 +4,7 @@ import java.util.List;
 
 public interface AccEntryItemService {
     AccEntryItem addAccEntryItem(AccEntryItem accEntryItem);
+    List<AccEntryItem> addSomeInSameEntry(List<AccEntryItem> accEntryItems);
 
     AccEntryItem getAccEntryItem(String id);
 
