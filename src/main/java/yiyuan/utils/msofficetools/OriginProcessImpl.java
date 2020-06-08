@@ -729,30 +729,73 @@ public class OriginProcessImpl implements OriginProcess {
 	 */
 	private List<Origin> preHandleBankOrigin(List<Origin> origins) {
 
-		String num;
+		
 		for (Origin origin : origins) {
 			if (!origin.getType().contains("Bank")) {
 				continue;
 			}
 			origin.setAmout(origin.getBank_income() + origin.getBank_pay());
-			origin.setBrief(origin.getBank_brief1()+" "+origin.getBank_brief2());
+			origin.setBrief(origin.getBank_brief1() + " " + origin.getBank_brief2());
+
 			List<Classfication> classfications = classficationService.getAllByName(origin.getRelative_account(),
 					this.companyName);
-
+			String 应收账款类的科目名称 = classficationService.getNumber(classfications, companyName, "应收账款");
+			String 其他应收款的科目名称 = classficationService.getNumber(classfications, companyName, "其他应收款");
+			String 其他应收款_其他 = classficationService.getNumber("其他", companyName, "其他应收款");
+			String 应付账款类的科目名称 = classficationService.getNumber(classfications, companyName, "应付账款");
+			String 其他应付款类的科目名称 = classficationService.getNumber(classfications, companyName, "其他应付款");
+			String 其他应付款_其他 = classficationService.getNumber("其他", companyName, "其他应付款_其他");
 			// bank income
 			if (origin.getBank_income() >= 0.01) {
-				if ((num = classficationService.getNumber(classfications, companyName, "应收账款")) != null) {
+				if (应收账款类的科目名称 != null) {
 					origin.setType(OriginType.Bank_Income_Receivable.value);
-					origin.setRelative_account_number(num);
-				} else if ((num = classficationService.getNumber(classfications, companyName, "其他应收款")) != null) {
+					origin.setRelative_account_number(应收账款类的科目名称);
+				} else if (其他应收款的科目名称 != null) {
 					origin.setType(OriginType.Bank_Income_Receivable.value);
-					origin.setRelative_account_number(num);
-				}else if ((num = classficationService.getNumber(classfications, companyName, "其他应付款")) != null) {
+					origin.setRelative_account_number(其他应收款的科目名称);
+				} else if (应付账款类的科目名称 != null) {
 					origin.setType(OriginType.Bank_Income_Other.value);
-					origin.setRelative_account_number(num);
-				}else if (origin.getBrief().contains(companyProperties.getKeyword().get("bankInterest"))) {
+					origin.setRelative_account_number(应付账款类的科目名称);
+				} else if (isContainKeyword(origin.getBrief(), "bankFee")) {
+					origin.setRelative_account_number(companyProperties.getCompanies().get(companyName).get("bankFee"));
+					origin.setType(OriginType.Bank_Income_Interest.value);
+				} else if (classfications.size() == 0) { // 没有对应的科目
 					origin.setType(OriginType.Bank_Income_Other.value);
-					origin.setRelative_account_number(num);
+					if (其他应收款_其他 != null) {
+						origin.setRelative_account_number(其他应收款_其他);
+					} else {
+						origin.setRelative_account_number(其他应付款_其他 != null ? 其他应付款_其他 : "未找到");
+					}
+				}
+			} else if (origin.getBank_pay() >= 0.01) {
+				if (应付账款类的科目名称 != null) {
+					origin.setType(OriginType.Bank_Pay_Payable.value);
+					origin.setRelative_account_number(应付账款类的科目名称);
+				} else if (其他应付款类的科目名称 != null) {
+					origin.setType(OriginType.Bank_Pay_Other.value);
+					origin.setRelative_account_number(其他应付款类的科目名称);
+				} else if (应收账款类的科目名称 != null) {
+					origin.setType(OriginType.Bank_Pay_Other.value);
+					origin.setRelative_account_number(应收账款类的科目名称);
+				} else if (isContainKeyword(origin.getBrief(), "bankSalary")) { // 发放工资
+					origin.setRelative_account_number(companyProperties.getCompanies().get(companyName).get("yfgz"));
+					origin.setType(OriginType.Bank_Pay_Salary.value);
+				} else if (isContainKeyword(origin.getBrief(), "bankTax")) { // 缴税,不设置related account
+					// origin.setRelative_account_number(companyProperties.getCompanies().get(companyName).get("bankTax"));
+					origin.setType(OriginType.Bank_Pay_Tax.value);
+				} else if (isContainKeyword(origin.getBrief(), "bankSecurity")) { // 社保,不设置related account
+					// origin.setRelative_account_number(companyProperties.getCompanies().get(companyName).get("socailSecurity"));
+					origin.setType(OriginType.Bank_Pay_SocialSecurity.value);
+				} else if (isContainKeyword(origin.getBrief(), "bankFee")) { // 银行费用
+					origin.setRelative_account_number(companyProperties.getCompanies().get(companyName).get("bankFee"));
+					origin.setType(OriginType.Bank_Pay_BankFee.value);
+				} else if (classfications.size() == 0) { // 没有对应的科目
+					origin.setType(OriginType.Bank_Pay_Other.value);
+					if (其他应付款_其他 != null) {
+						origin.setRelative_account_number(其他应付款_其他);
+					} else {
+						origin.setRelative_account_number(其他应收款_其他 != null ? 其他应收款_其他 : "未找到");
+					}
 				}
 			}
 		}
@@ -760,4 +803,14 @@ public class OriginProcessImpl implements OriginProcess {
 		return origins;
 	}
 
+	private boolean isContainKeyword(String brief, String keyword) {
+		String[] strs = companyProperties.getKeyword().get("bankFee").split("\\|");
+		for (String str : strs) {
+			if (brief.contains(str)) {
+
+				return true;
+			}
+		}
+		return false;
+	}
 }

@@ -115,12 +115,15 @@ public class YiyuanApplicationTests {
 
 	@Test
 	public void test3() {
-      
-	  List<Classfication> classfications=claService.getAllByName("郑茂", "CHKJ");
-	  
-	  String number=claService.getNumber(classfications, "CHKJ", "其他应收");
-		 pt("number:------>"+number);
-		
+         String ostr="短信服务费";
+		 String[] strs=companyPro.getKeyword().get("bankFee").split("\\|");
+		 for(String str:strs) {
+			 if(ostr.contains(str)) {
+				pt(true);
+				return;
+			 }
+		 }
+		 pt(false);
 	}
 	
 	

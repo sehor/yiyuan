@@ -37,6 +37,7 @@ props:
         jyf: 222113
         dfjyf: 222114
         yfgz: 221101
+        bankFee: 560303
          
      AOKJ: 
         name: 深圳市安欧科技有限公司 
@@ -45,12 +46,14 @@ props:
         jyf: 222104
         dfjyf: 222105
         yfgz: 221101
+        bankFee: 560303
         
      CHKJ: 
         name: 深圳市创和技术有限公司 
         cost: 140501
         cj: 222108
         jyf: 222113
-        dfjyf: 222114
         yfgz: 221101
+        dfjyf: 222114
+        bankFee: 560303
       
