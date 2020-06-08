@@ -23,11 +23,22 @@ props:
 
      bankSecurity: 社保|社会保险
 
-     bankSalary: 工资
+     bankSalary: 工资|发放工资
        
-     bankExpense: 报销 
+     bankExpense: 报销|报销费用
      
-     bankInterest: 结息 
+     bankInterest: 结息|利息
+     
+     bankVATAndAdditionalTax: 增值税及附加税
+     
+     bankVAT: 增值税
+     
+     bankAdditionanlTax: 附加税
+     
+     bankIncomeTax: 企业所得税
+     
+     bankPersonalTax: 个人所得税
+
               
   companies:
      YYKJ: 
@@ -38,6 +49,8 @@ props:
         dfjyf: 222114
         yfgz: 221101
         bankFee: 560303
+        DefaultVTARate: 0.13
+        personSecurityAmout: 5156
          
      AOKJ: 
         name: 深圳市安欧科技有限公司 
@@ -47,7 +60,8 @@ props:
         dfjyf: 222105
         yfgz: 221101
         bankFee: 560303
-        
+        DefaultVTARate: 0.06
+        personSecurityAmout: 214
      CHKJ: 
         name: 深圳市创和技术有限公司 
         cost: 140501
@@ -56,4 +70,6 @@ props:
         yfgz: 221101
         dfjyf: 222114
         bankFee: 560303
+        DefaultVTARate: 0.13
+        personSecurityAmout: 421
       

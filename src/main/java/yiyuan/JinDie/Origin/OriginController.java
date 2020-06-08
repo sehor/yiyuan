@@ -4,10 +4,12 @@ import io.swagger.annotations.Api;
 import yiyuan.JinDie.OriginType;
 import yiyuan.JinDie.JinDieRecord.JinDieRecord;
 import yiyuan.JinDie.JinDieRecord.JinDieRecordService;
+import yiyuan.utils.msofficetools.DefaultBeansToXLSTransform;
 import yiyuan.utils.msofficetools.OriginProcess;
 import yiyuan.utils.msofficetools.ReadDataFromExcel;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -63,8 +65,10 @@ public class OriginController {
 	@GetMapping("/operations")
 	public List<Origin> operations() {
 		List<Origin> list = service.getAll();
-		list=list.stream().filter(e -> e.getCompanyName().equals("CHKJ") && e.getType().equalsIgnoreCase(OriginType.Issue_Invoice.value)).collect(Collectors.toList());
-        
+		list = list.stream().filter(
+				e -> e.getCompanyName().equals("CHKJ") && e.getType().equalsIgnoreCase(OriginType.Issue_Invoice.value))
+				.collect(Collectors.toList());
+
 		return list;
 	}
 
@@ -81,8 +85,16 @@ public class OriginController {
 			@RequestParam(value = "end", defaultValue = "2018-09-30") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
 		List<Origin> origins = service.getInPeriod(companyName, begin, end);
-        origins=origins.stream().filter(e->e.getType().contains("Bank")).collect(Collectors.toList());
-		//origins = process.preProcessOrigin(origins);
+		origins = origins.stream().filter(e -> e.getType().contains("Bank")).collect(Collectors.toList());
+		origins = process.setCompanyName(companyName).preProcessOrigin(origins);
+
+		try {
+			new DefaultBeansToXLSTransform<Origin>(Origin.class).createWorkbook(origins)
+					.write(new File("C:\\Users\\pzr\\Desktop\\preOrigin-创和.xlsx"));
+		} catch (IOException e1) {
+			
+			e1.printStackTrace();
+		}
 
 		return origins;
 	}
@@ -93,7 +105,7 @@ public class OriginController {
 			@RequestParam(value = "begin", defaultValue = "2018-09-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
 			@RequestParam(value = "end", defaultValue = "2018-09-30") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
-		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName,OriginType.BanK.value);
+		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.BanK.value);
 
 		process.recordWriteToFile("C:\\Users\\pzr\\Desktop\\record-创和.xlsx", records);
 

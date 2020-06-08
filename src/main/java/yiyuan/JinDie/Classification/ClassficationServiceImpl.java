@@ -63,6 +63,7 @@ public class ClassficationServiceImpl implements ClassficationService {
 	public String getNumber(String name, String companyName, String rootName) {
 
 		Classfication root = getByNameAndCompanyName(rootName, companyName);
+		if(root==null) return "未找到";
 		List<Classfication> list = repository.findBy名称AndCompanyName(name, companyName);
 		for (Classfication classfication : list) {
 			if (classfication.get编码().startsWith(root.get编码())) {
