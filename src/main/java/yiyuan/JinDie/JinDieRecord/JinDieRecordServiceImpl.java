@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import yiyuan.JinDie.Origin.Origin;
 import yiyuan.JinDie.Origin.OriginService;
+import yiyuan.other.annotation.TimeCost;
 import yiyuan.utils.msofficetools.OriginProcess;
 
 @Service
@@ -42,6 +43,7 @@ OriginProcess originProcess;
     }
     
 	@Override
+	@TimeCost
 	public List<JinDieRecord> processToRecords(LocalDate begin, LocalDate end,String companyName) {
 		// TODO Auto-generated method stub
 		
@@ -81,8 +83,9 @@ OriginProcess originProcess;
 						origins=originProcess.setCompanyName(companyName).preProcessOrigin(origins);
 						origins=origins.stream().filter(e->e.getType().contains(type)).collect(Collectors.toList());
 						List<JinDieRecord> recordsInOnePreriod=originProcess.setCompanyName(companyName).proccessToRecord(origins, currentEnd);
+						sortRecords(recordsInOnePreriod);
 						records.addAll(recordsInOnePreriod);
-						sortRecords(records);
+					
 						currentBegin=currentBegin.plusMonths(1);
 						currentEnd=currentBegin.with(TemporalAdjusters.lastDayOfMonth());	
 						
