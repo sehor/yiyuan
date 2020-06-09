@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -28,15 +29,17 @@ public class OriginProcessImpl implements OriginProcess {
 	@Autowired
 	CompanyProperties companyProperties;
 	@Autowired
-	ClassficationService classfictionService;
+	ClassficationService classficationService;
 	@Autowired
 	OriginService originService;
 
-	private final float VTARate = 0.13f;
 	private final float CJ_Tax_Rate = 0.07f;
 	private final float JY_Tax_Rate = 0.03f;
 	private final float DFJY_Tax_Rate = 0.02f;
+
 	private String companyName = "未指点公司名称";
+
+	private EntryHelper entryHelper = new EntryHelper(); // 主类内部共享一个唯一内部类实例
 
 	@Override
 	public OriginProcess setCompanyName(String companyName) {
@@ -48,10 +51,10 @@ public class OriginProcessImpl implements OriginProcess {
 	public List<JinDieRecord> proccessToRecord(List<Origin> origins, LocalDate date) {
 		// TODO Auto-generated method stub
 
-		this.map.clear();// 每个会计期间初始化map
+		this.entryHelper.initMap(); // 初始化
 
 		List<JinDieRecord> records = new ArrayList<>();
-		records.addAll(proccessBankToRecord1(origins, date));
+		records.addAll(proccessBankToRecord(origins, date));
 		/*
 		 * records.addAll(processIssueInvoiceToRecords(origins, date));
 		 * records.addAll(processReceiveInvoiceToRecords(origins, date));
@@ -69,389 +72,13 @@ public class OriginProcessImpl implements OriginProcess {
 		return origins;
 	}
 
-	private Map<String, List<Integer>> map = new HashMap<>();
-	@Autowired
-	ClassficationService classficationService;
-
-	private List<Origin> processTypeOfBank(List<Origin> orings) {
-
-		for (Origin origin : orings) {
-
-			if (!origin.getType().contains("Bank"))
-				continue;
-			origin.setAmout(origin.getBank_income() + origin.getBank_pay());
-			origin.setBrief(linkBrief(origin.getBrief(), origin.getBank_brief1(), origin.getBank_brief2()));
-			Classfication classfication = classficationService.getByName(origin.getRelative_account());
-			String rootNum = "";
-			if (classfication != null) {
-				origin.setRelative_account_number(classfication.get编码());
-				rootNum = classfication.get编码().substring(0, 4); // 一级编码
-			}
-			// 银行收款事项
-			if (origin.getBank_income() != 0) {
-
-				if (rootNum.equals("1122")) { // 应收账款
-					origin.setType(OriginType.Bank_Income_Receivable.value);
-
-				} else if (rootNum.equals("1221")) { // 其他应收款
-					origin.setType(OriginType.Bank_Income_OtherReceivable.value);
-				} else if (rootNum.equals("2241")) { // 其他应付款
-					origin.setType(OriginType.Bank_Income_OtherPayable.value);
-				} else if (origin.getBrief().contains("结息")) {
-					origin.setType(OriginType.Bank_Income_Interest.value);
-				} else {
-
-					origin.setType(OriginType.Bank_Income_Other.value);
-				}
-
-			}
-
-			// 银行付款事项
-			else if (origin.getBank_pay() != 0) {
-
-				if (rootNum.equals("2202")) { // 应付账款
-					origin.setType(OriginType.Bank_Pay_Payable.value);
-				} else if (origin.getBrief().contains("工资")) { // 工资
-
-					origin.setType(OriginType.Bank_Pay_Salary.value);
-				} else if (origin.getBrief().contains("报销")) { // 报销，默认其他应付账款-法人
-					origin.setType(OriginType.Bank_Pay_Expensive.value);
-				}
-
-				else if (origin.getBrief().contains("缴税") || origin.getBrief().contains("协议扣税")) { // 缴税
-					origin.setType(OriginType.Bank_Pay_Tax.value);
-				} else if (origin.getBrief().contains("社保") || origin.getBrief().contains("社会保险")) { // 缴税
-					origin.setType(OriginType.Bank_Pay_SocialSecurity.value);
-				}
-
-				else if (origin.getBrief().contains("收费项目") || origin.getBrief().contains("短信服务费")
-						|| origin.getBrief().contains("手续费")) { // 银行费用
-
-					origin.setType(OriginType.Bank_Pay_BankFee.value);
-					origin.setRelative_account("手续费"); // 手续费
-				} else if (rootNum.endsWith("2241")) { // 其他应付账款
-					origin.setType(OriginType.Bank_Pay_OtherPayable.value);
-				} else {
-
-					origin.setType(OriginType.Bank_Pay_OtherPayable.value);
-				}
-			}
-
-		}
-
-		return orings;
-
-	}
-
-	private List<JinDieRecord> proccessBankToRecord(List<Origin> origins, LocalDate date) {
-
-		List<JinDieRecord> jinDieRecords = new ArrayList<>();
-
-		for (Origin origin : origins) {
-			if (!origin.getType().contains("Bank"))
-				continue;
-			List<Integer> list = getEntryNumAndItemNum(origin.getType());
-			int entryNum = list.get(0);
-			int itemNum = list.get(1);
-
-			JinDieRecord record = new JinDieRecord();
-			JinDieRecord record2 = new JinDieRecord();
-
-			record.set凭证字("记");
-			record.set凭证号(entryNum);
-			record.set日期(date);
-			record.set分录序号(itemNum);
-			list.set(1, ++itemNum); // 保存回map
-
-			record2.set凭证字("记");
-			record2.set凭证号(entryNum);
-			record2.set日期(date);
-			record2.set分录序号(itemNum);
-			record2.set科目名称(origin.getRelative_account() != null ? origin.getRelative_account() : "未找到");
-			list.set(1, ++itemNum); //
-
-			switch (origin.getType()) {
-			case "Bank_Income_Receivable":
-				record.set借方金额(origin.getAmout());
-				record.set摘要("收款-货款");
-				record.set科目代码("100201"); // 默认的基本户
-
-				record2.set贷方金额(origin.getAmout());
-				record2.set摘要("收款-货款");
-				record2.set科目代码(origin.getRelative_account_number());
-				break;
-
-			case "Bank_Income_OtherReceivable":
-				record.set借方金额(origin.getAmout());
-				record.set摘要("收款-其他");
-				record.set科目代码("100201"); // 默认的基本户
-
-				record2.set贷方金额(origin.getAmout());
-				record2.set摘要("收款-其他");
-				record2.set科目代码(
-						origin.getRelative_account_number() != null ? origin.getRelative_account_number() : "未处理");
-				break;
-			case "Bank_Income_OtherPayable":
-				record.set借方金额(origin.getAmout());
-				record.set摘要("收款-其他");
-				record.set科目代码("100201"); // 默认的基本户
-
-				record2.set贷方金额(origin.getAmout());
-				record2.set摘要("收款-其他");
-				record2.set科目代码(
-						origin.getRelative_account_number() != null ? origin.getRelative_account_number() : "未处理");
-				break;
-			case "Bank_Income_Interest":
-				record.set借方金额(origin.getAmout());
-				record.set摘要("存款结息");
-				record.set科目代码("100201"); // 默认的基本户
-
-				record2.set贷方金额(origin.getAmout());
-				record2.set摘要("存款结息");
-				record2.set科目代码("560302");
-				break;
-			case "Bank_Pay_Payable":
-				record.set贷方金额(origin.getAmout());
-				record.set摘要("付款-货款");
-				record.set科目代码("100201"); // 默认的基本户
-
-				record2.set借方金额(origin.getAmout());
-				record2.set摘要("付款-货款");
-				record2.set科目代码(origin.getRelative_account_number());
-				break;
-			case "Bank_Pay_Salary":
-				record.set贷方金额(origin.getAmout());
-				record.set摘要("发放工资");
-				record.set科目代码("100201"); // 默认的基本户
-
-				record2.set借方金额(origin.getAmout());
-				record2.set摘要("发放工资");
-				record2.set科目代码("221101");
-				break;
-			case "Bank_Pay_BankFee":
-				record.set贷方金额(origin.getAmout());
-				record.set摘要("银行费用");
-				record.set科目代码("100201"); // 默认的基本户
-
-				record2.set借方金额(origin.getAmout());
-				record2.set摘要("银行费用");
-				record2.set科目代码("560303");
-				break;
-			case "Bank_Pay_OtherPayable":
-				record.set贷方金额(origin.getAmout());
-				record.set摘要("其他支出：" + origin.getBrief());
-				record.set科目代码("100201"); // 默认的基本户
-
-				record2.set借方金额(origin.getAmout());
-				record2.set摘要("其他支出：" + origin.getBrief());
-				record2.set科目代码(
-						origin.getRelative_account_number() != null ? origin.getRelative_account_number() : "未找到");
-				break;
-			case "Bank_Pay_Expensive":
-				record.set贷方金额(origin.getAmout());
-				record.set摘要("报销费用");
-				record.set科目代码("100201"); // 默认的基本户
-
-				record2.set借方金额(origin.getAmout());
-				record2.set摘要("报销费用");
-				record2.set科目代码("224101"); // 其他应付款-法人
-				break;
-
-			case "Bank_Pay_SocialSecurity":
-				record.set贷方金额(origin.getAmout());
-				record.set摘要("缴纳社保");
-				record.set科目代码("100201"); // 默认的基本户
-
-				record2.set借方金额(origin.getAmout());
-				record2.set摘要("缴纳社保");
-				record2.set科目代码("560216");
-				break;
-
-			case "Bank_Pay_Tax":
-				record.set贷方金额(origin.getAmout());
-				record.set摘要("缴纳税费");
-				record.set科目代码("100201"); // 默认的基本户
-
-				if (origin.getBrief().contains("增值税及附加税")) {
-					double vta = origin.getAmout() / 1.12; // 增值税
-
-					record2.set借方金额(vta);
-					record2.set科目代码("222102"); // 未交增值税
-					record2.set摘要("缴纳税费");
-
-					JinDieRecord record4 = new JinDieRecord();
-					record4.set摘要("缴纳税费");
-					record4.set凭证字("记");
-					record4.set日期(date);
-					record4.set借方金额((vta * 0.07));
-					record4.set科目代码("222108"); // 城建税
-					record4.set凭证号(entryNum);
-					record4.set分录序号(itemNum);
-					list.set(1, ++itemNum); // 保存回map
-
-					JinDieRecord record5 = new JinDieRecord();
-					record5.set摘要("缴纳税费");
-					record5.set凭证字("记");
-					record5.set日期(date);
-					record5.set借方金额(vta * 0.03);
-					record5.set科目代码("222113"); // 教育费
-					record5.set凭证号(entryNum);
-					record5.set分录序号(itemNum);
-					list.set(1, ++itemNum); // 保存回map
-
-					JinDieRecord record6 = new JinDieRecord();
-					record6.set摘要("缴纳税费");
-					record6.set凭证字("记");
-					record6.set日期(date);
-					record6.set借方金额(vta * 0.02);
-					record6.set科目代码("222114"); // 教育费附加
-					record6.set凭证号(entryNum);
-					record6.set分录序号(itemNum);
-					list.set(1, ++itemNum); // 保存回map
-
-					jinDieRecords.addAll(List.of(record4, record5, record6));
-				} else if (origin.getBrief().contains("增值税")) {
-
-					record2.set借方金额(origin.getAmout());
-					record2.set科目代码("222102"); // 增值税
-					record2.set摘要("缴纳税费");
-				} else if (origin.getBrief().contains("附加税")) {
-
-					double amout = origin.getAmout();
-
-					record2.set摘要("缴纳税费");
-					record2.set借方金额((amout * 7 / 12));
-					record2.set科目代码("222108"); // 城建税
-
-					JinDieRecord record3 = new JinDieRecord();
-					record3.set摘要("缴纳税费");
-					record3.set凭证字("记");
-					record3.set日期(date);
-					record3.set借方金额(amout * 3 / 12);
-					record3.set科目代码("222113"); // 教育费
-					record3.set凭证号(entryNum);
-					record3.set分录序号(itemNum);
-					list.set(1, ++itemNum); // 保存回map
-
-					JinDieRecord record4 = new JinDieRecord();
-					record4.set摘要("缴纳税费");
-					record4.set凭证字("记");
-					record4.set日期(date);
-					record4.set借方金额(amout * 2 / 12);
-					record4.set科目代码("222114"); // 教育费附加
-					record4.set凭证号(entryNum);
-					record4.set分录序号(itemNum);
-					list.set(1, ++itemNum); // 保存回map
-
-					jinDieRecords.addAll(List.of(record3, record4));
-				} else if (origin.getBrief().contains("企业所得税")) {
-
-					record2.set借方金额(origin.getAmout());
-					record2.set科目代码("5801"); // 企业所得税
-					record2.set摘要("缴纳税费");
-				} else if (origin.getBrief().contains("个人所得税")) {
-
-					record2.set借方金额(origin.getAmout());
-					record2.set科目代码("222112"); // 企业所得税
-					record2.set摘要("缴纳税费");
-				} else {
-
-					record2.set借方金额(origin.getAmout());
-					record2.set科目名称("归集管理费用的税金"); // 归集管理费用的税金
-					record2.set摘要("缴纳税费");
-				}
-
-				break;
-
-			case "No_Handled":
-				record.set贷方金额(origin.getAmout());
-				record.set摘要("未处理: " + origin.getBrief());
-
-				record2.set借方金额(origin.getAmout());
-				record2.set摘要("未处理: " + origin.getBrief());
-
-				break;
-			}
-			map.put(origin.getType(), list); // 更新map ，itemNum变了
-
-			jinDieRecords.addAll(List.of(record, record2));
-
-		}
-
-		return jinDieRecords;
-
-	}
-
-	private List<JinDieRecord> processIssueInvoiceToRecords(List<Origin> origins, LocalDate date) {
-
-		List<Origin> list = origins.stream().filter(e -> e.getType().equals("Issue_Invoice"))
-				.collect(Collectors.toList());
-		List<JinDieRecord> records = new ArrayList<>();
-		if (list.size() <= 0)
-			return records;
-
-		List<Integer> state = getEntryNumAndItemNum("Issue_Invoice");
-		double tax = 0, amount = 0;
-
-		for (Origin origin : list) {
-
-			// System.out.println("issue: " + origin.getRelative_account());
-			JinDieRecord record = new JinDieRecord();
-			tax += origin.getInvoice_tax();
-			amount += origin.getInvoice_amount();
-
-			record.set日期(date);
-			record.set凭证字("记");
-			record.set凭证号(state.get(0));
-			record.set摘要("开出发票，确认收入");
-
-			record.set分录序号(state.get(1));
-			state.set(1, state.get(1) + 1);
-
-			record.set科目名称(origin.getRelative_account());
-			record.set科目代码(getAccountNum(origin.getRelative_account())); //
-			record.set借方金额(origin.getInvoice_tax() + origin.getInvoice_amount());
-
-			records.add(record);
-		}
-
-		JinDieRecord record1 = new JinDieRecord();
-		record1.set日期(date);
-		record1.set凭证字("记");
-		record1.set凭证号(state.get(0));
-		record1.set分录序号(state.get(1));
-		state.set(1, state.get(1) + 1);
-		record1.set科目代码("5001"); // 主营业务收入
-		record1.set贷方金额(amount);
-		record1.set摘要("开出发票，确认收入");
-		record1.set科目名称("主营业务收入");
-
-		JinDieRecord record2 = new JinDieRecord();
-		record2.set日期(date);
-		record2.set凭证字("记");
-		record2.set凭证号(state.get(0));
-		record2.set分录序号(state.get(1));
-		state.set(1, state.get(1) + 1);
-		record2.set科目代码("22210106"); // 销项税额
-		record2.set贷方金额(tax);
-		record2.set摘要("开出发票，确认收入");
-		record2.set科目名称("销项税额");
-
-		records.addAll(List.of(record1, record2));
-
-		this.map.put("Issue_Invoice", state); // 更新map
-
-		return records;
-
-	}
-
 	@SuppressWarnings("deprecation")
 	private List<JinDieRecord> processReceiveInvoiceToRecordsByType(List<Origin> origins, LocalDate date, String type) {
 
 		List<JinDieRecord> records = new ArrayList<>();
 		if (origins.size() < 1)
 			return records;
-		List<Integer> state = getEntryNumAndItemNum(type);
+
 		double tax = 0, amount = 0;
 		for (Origin origin : origins) {
 			// System.out.println("receive: " + origin.getRelative_account());
@@ -461,10 +88,9 @@ public class OriginProcessImpl implements OriginProcess {
 
 			record.set日期(date);
 			record.set凭证字("记");
-			record.set凭证号(state.get(0));
+			record.set凭证号(this.entryHelper.genEntryNum(origin));
 
-			record.set分录序号(state.get(1));
-			state.set(1, state.get(1) + 1);
+			record.set分录序号(this.entryHelper.genItemNum(origin));
 
 			record.set摘要("收到发票，确认费用");
 
@@ -476,13 +102,13 @@ public class OriginProcessImpl implements OriginProcess {
 
 			records.add(record);
 		}
-
+		Origin origin = origins.get(0);
 		JinDieRecord record1 = new JinDieRecord();
 		record1.set日期(date);
 		record1.set凭证字("记");
-		record1.set凭证号(state.get(0));
-		record1.set分录序号(state.get(1));
-		state.set(1, state.get(1) + 1);
+		record1.set凭证号(this.entryHelper.genEntryNum(origin));
+		record1.set分录序号(this.entryHelper.genEntryNum(origin));
+
 		record1.set科目代码(companyProperties.getCompanies().get(this.companyName).get("cost")); // 成本科目
 
 		record1.set借方金额(amount);
@@ -491,17 +117,14 @@ public class OriginProcessImpl implements OriginProcess {
 		JinDieRecord record2 = new JinDieRecord();
 		record2.set日期(date);
 		record2.set凭证字("记");
-		record2.set凭证号(state.get(0));
-		record2.set分录序号(state.get(1));
-		state.set(1, state.get(1) + 1);
+		record2.set凭证号(this.entryHelper.genEntryNum(origin));
+		record2.set分录序号(this.entryHelper.genEntryNum(origin));
+
 		record2.set科目代码("22210101"); // 进项税额
 		record2.set借方金额(tax);
 		record2.set摘要("收到发票，确认费用");
 
 		records.addAll(List.of(record1, record2));
-
-		this.map.put(type, state); // 更新map
-
 		return records;
 
 	}
@@ -536,18 +159,18 @@ public class OriginProcessImpl implements OriginProcess {
 		List<JinDieRecord> records = new ArrayList<>();
 		if (list.size() <= 0)
 			return records;
-		List<Integer> state = getEntryNumAndItemNum("Handle_VTA");
+
 		for (Origin origin : list) {
 			System.out.println("handle VTA: " + origin.getRelative_account());
 			for (int i = 0; i <= 5; i++) {
 				JinDieRecord record = new JinDieRecord();
 				record.set日期(date);
 				record.set凭证字("记");
-				record.set凭证号(state.get(0));
+				record.set凭证号(this.entryHelper.genEntryNum(origin));
 				record.set摘要("月末增值税处理");
 
-				record.set分录序号(state.get(1));
-				state.set(1, state.get(1) + 1);
+				record.set分录序号(this.entryHelper.genItemNum(origin));
+
 				records.add(record);
 			}
 			records.get(0).set借方金额(origin.getAmout());// 未交增值税
@@ -570,7 +193,6 @@ public class OriginProcessImpl implements OriginProcess {
 
 		}
 
-		this.map.put("Handle_VTA", state); // 更新map
 		return records;
 
 	}
@@ -582,18 +204,18 @@ public class OriginProcessImpl implements OriginProcess {
 		List<JinDieRecord> records = new ArrayList<>();
 		if (list.size() <= 0)
 			return records;
-		List<Integer> state = getEntryNumAndItemNum("Accrued_Salary");
+
 		for (Origin origin : list) {
 			// System.out.println("salary: " + origin.getSalary_payable());
 			for (int i = 0; i >= 4; i++) {
 				JinDieRecord record = new JinDieRecord();
 				record.set日期(date);
 				record.set凭证字("记");
-				record.set凭证号(state.get(0));
+				record.set凭证号(this.entryHelper.genEntryNum(origin));
 				record.set摘要("计提工资");
 
-				record.set分录序号(state.get(1));
-				state.set(1, state.get(1) + 1);
+				record.set分录序号(this.entryHelper.genItemNum(origin));
+
 				records.add(record);
 			}
 			records.get(0).set借方金额(origin.getBasicSalary());// 未交增值税
@@ -613,7 +235,6 @@ public class OriginProcessImpl implements OriginProcess {
 			records.get(4).set科目代码(getAccountNum("应付工资"));
 		}
 
-		this.map.put("Accrued_Salary", state); // 更新map
 		return records;
 
 	}
@@ -650,51 +271,6 @@ public class OriginProcessImpl implements OriginProcess {
 	}
 
 	// 获得一个唯一的凭证号list(0)，和顺序增加的记录号 list(1)
-	private List<Integer> getEntryNumAndItemNum(String type) {
-
-		List<Integer> states = this.map.get(type);
-
-		if (states == null) {
-			List<Integer> list = new ArrayList<>();
-			list.add(100 + map.size()); // 凭证号从100开始+map长度
-			list.add(1);// 记录号从1开始
-			this.map.put(type, list);
-			return list;
-		}
-
-		return states;
-	}
-
-	private int getEntryNum(String type) {
-
-		if (this.map.get(type) == null) {
-			this.map.put(type, List.of(100 + map.size(), 1)); // 加入新的凭证号，从100开始+map长度，记录号从1开始
-		}
-		return this.map.get(type).get(0);
-	}
-
-	private int getEntryItemNum(String type) {
-		int entyNum = getEntryNum(type);
-		int itemNum = this.map.get(type).get(1);
-		List<Integer> state = List.of(entyNum, itemNum + 1);
-
-		this.map.put(type, state); // 新的记录号增加1
-
-		return itemNum;
-
-	}
-
-	private String linkBrief(String... briefs) {
-
-		List<String> list = new ArrayList<>();
-		for (String brief : briefs) {
-
-			if (brief != null)
-				list.add(brief);
-		}
-
-		return String.join(";", list);
-	}
 
 	private String getAccountNum(String accountName) {
 		Classfication classfication = classficationService.getByNameAndCompanyName(accountName, this.companyName);
@@ -757,27 +333,28 @@ public class OriginProcessImpl implements OriginProcess {
 
 			List<Classfication> classfications = classficationService.getAllByName(origin.getRelative_account(),
 					this.companyName);
-			String 应收账款类的科目名称 = classficationService.getNumber(classfications, companyName, "应收账款");
-			String 其他应收款的科目名称 = classficationService.getNumber(classfications, companyName, "其他应收款");
+			String 应收账款类的科目 = classficationService.getNumber(classfications, companyName, "应收账款");
+			String 其他应收款的科目 = classficationService.getNumber(classfications, companyName, "其他应收款");
 			String 其他应收款_其他 = classficationService.getNumber("其他", companyName, "其他应收款");
-			String 应付账款类的科目名称 = classficationService.getNumber(classfications, companyName, "应付账款");
-			String 其他应付款类的科目名称 = classficationService.getNumber(classfications, companyName, "其他应付款");
+			String 应付账款类的科目 = classficationService.getNumber(classfications, companyName, "应付账款");
+			String 其他应付款类的科目 = classficationService.getNumber(classfications, companyName, "其他应付款");
 			String 其他应付款_其他 = classficationService.getNumber("其他", companyName, "其他应付款");
 
 			// bank income，收款是收款，按应收账款-.>其他应收款-,>应付账款->其他应付款的顺序赋值，如果是付款，顺序反之
 			if (origin.getBank_income() >= 0.01) {
-				if (应收账款类的科目名称 != null) {
+				if (应收账款类的科目 != null) {
 					origin.setType(OriginType.Bank_Income_Receivable.value);
-					origin.setRelative_account_number(应收账款类的科目名称);
-				} else if (其他应收款的科目名称 != null) {
-					origin.setType(OriginType.Bank_Income_Receivable.value);
-					origin.setRelative_account_number(其他应收款的科目名称);
-				} else if (应付账款类的科目名称 != null) {
+					origin.setRelative_account_number(应收账款类的科目);
+				} else if (其他应收款的科目 != null) {
+					// origin.setType(OriginType.Bank_Income_Receivable.value);
+					setOtherAccountType(origin, OriginType.Bank_Income_Receivable.value);
+					origin.setRelative_account_number(其他应收款的科目);
+				} else if (应付账款类的科目 != null) {
 					origin.setType(OriginType.Bank_Income_Other.value);
-					origin.setRelative_account_number(应付账款类的科目名称);
-				} else if (其他应付款类的科目名称 != null) {
-					origin.setType(OriginType.Bank_Pay_Other.value);
-					origin.setRelative_account_number(其他应付款类的科目名称);
+					origin.setRelative_account_number(应付账款类的科目);
+				} else if (其他应付款类的科目 != null) {
+					setOtherAccountType(origin, OriginType.Bank_Income_OtherPayable.value);
+					origin.setRelative_account_number(其他应付款类的科目);
 				} else if (isContainKeyword(origin.getBrief(), "bankInterest")) {
 					origin.setRelative_account_number(
 							companyProperties.getCompanies().get(this.companyName).get("bankFee"));
@@ -791,18 +368,18 @@ public class OriginProcessImpl implements OriginProcess {
 					}
 				}
 			} else if (origin.getBank_pay() >= 0.01) {
-				if (应付账款类的科目名称 != null) {
+				if (应付账款类的科目 != null) {
 					origin.setType(OriginType.Bank_Pay_Payable.value);
-					origin.setRelative_account_number(应付账款类的科目名称);
-				} else if (其他应付款类的科目名称 != null) {
-					origin.setType(OriginType.Bank_Pay_Other.value);
-					origin.setRelative_account_number(其他应付款类的科目名称);
-				} else if (其他应收款的科目名称 != null) {
-					origin.setType(OriginType.Bank_Pay_Other.value);
-					origin.setRelative_account_number(其他应收款的科目名称);
-				} else if (应收账款类的科目名称 != null) {
-					origin.setType(OriginType.Bank_Pay_Other.value);
-					origin.setRelative_account_number(应收账款类的科目名称);
+					origin.setRelative_account_number(应付账款类的科目);
+				} else if (其他应付款类的科目 != null) {
+					setOtherAccountType(origin, OriginType.Bank_Pay_OtherPayable.value);
+					origin.setRelative_account_number(其他应付款类的科目);
+				} else if (其他应收款的科目 != null) {
+					setOtherAccountType(origin, OriginType.Bank_Pay_OtherReceivable.value);
+					origin.setRelative_account_number(其他应收款的科目);
+				} else if (应收账款类的科目 != null) {
+					origin.setType(OriginType.Bank_Pay_Receivable.value);
+					origin.setRelative_account_number(应收账款类的科目);
 
 				} else if (isContainKeyword(origin.getBrief(), "bankSalary")) { // 发放工资
 					origin.setRelative_account_number(companyProperties.getCompanies().get(companyName).get("yfgz"));
@@ -841,7 +418,7 @@ public class OriginProcessImpl implements OriginProcess {
 		return false;
 	}
 
-	private List<JinDieRecord> proccessBankToRecord1(List<Origin> origins, LocalDate date) {
+	private List<JinDieRecord> proccessBankToRecord(List<Origin> origins, LocalDate date) {
 
 		List<JinDieRecord> jinDieRecords = new ArrayList<>();
 
@@ -856,18 +433,18 @@ public class OriginProcessImpl implements OriginProcess {
 			// 处理一般的bank origin
 			else {
 				if (origin.getBank_income() > 0.01) { // 银行借方
-					JinDieRecord bank_record = creatBankRecord(origin, getEntryNum(origin.getType()),
-							getEntryItemNum(origin.getType()));
-					JinDieRecord record = createRecord(origin, getEntryNum(origin.getType()),
-							getEntryItemNum(origin.getType()));
+					JinDieRecord bank_record = creatBankRecord(origin, this.entryHelper.genEntryNum(origin),
+							this.entryHelper.genItemNum(origin));
+					JinDieRecord record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+							this.entryHelper.genItemNum(origin));
 					record.set贷方金额(origin.getAmout());
 					jinDieRecords.addAll(List.of(bank_record, record));
 				} else if (origin.getBank_pay() > 0.01) { // 银行贷方
-					JinDieRecord record = createRecord(origin, getEntryNum(origin.getType()),
-							getEntryItemNum(origin.getType()));
+					JinDieRecord record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+							this.entryHelper.genItemNum(origin));
 					record.set借方金额(origin.getAmout());
-					JinDieRecord bank_record = creatBankRecord(origin, getEntryNum(origin.getType()),
-							getEntryItemNum(origin.getType()));
+					JinDieRecord bank_record = creatBankRecord(origin, this.entryHelper.genEntryNum(origin),
+							this.entryHelper.genItemNum(origin));
 					jinDieRecords.addAll(List.of(record, bank_record));
 				}
 
@@ -881,21 +458,21 @@ public class OriginProcessImpl implements OriginProcess {
 	private Collection<? extends JinDieRecord> handleBankPaySecurity(Origin origin) {
 		// TODO Auto-generated method stub
 		List<JinDieRecord> records = new ArrayList<>();
-		JinDieRecord person_security = createRecord(origin, getEntryNum(origin.getType()),
-				getEntryItemNum(origin.getType()));
+		JinDieRecord person_security = createRecord(origin, this.entryHelper.genEntryNum(origin),
+				this.entryHelper.genItemNum(origin));
 		person_security.set科目名称("应交社会保险费（个人）");
 		person_security.set科目代码(classficationService.getByNameAndCompanyName("应交社会保险费（个人）", this.companyName).get编码());
 		String personSecurityAmout = companyProperties.getCompanies().get(this.companyName).get("personSecurityAmout");
 		person_security.set借方金额(Double.valueOf(personSecurityAmout));
 
-		JinDieRecord company_security = createRecord(origin, getEntryNum(origin.getType()),
-				getEntryItemNum(origin.getType()));
+		JinDieRecord company_security = createRecord(origin, this.entryHelper.genEntryNum(origin),
+				this.entryHelper.genItemNum(origin));
 		company_security.set科目名称("应交社会保险费（个人）");
 		company_security.set科目代码(classficationService.getByNameAndCompanyName("应交社会保险费（个人）", this.companyName).get编码());
 		company_security.set借方金额(origin.getAmout() - person_security.get借方金额());
 
-		JinDieRecord bank_record = creatBankRecord(origin, getEntryNum(origin.getType()),
-				getEntryItemNum(origin.getType()));
+		JinDieRecord bank_record = creatBankRecord(origin, this.entryHelper.genEntryNum(origin),
+				this.entryHelper.genItemNum(origin));
 
 		records.addAll(List.of(person_security, company_security, bank_record));
 
@@ -938,26 +515,26 @@ public class OriginProcessImpl implements OriginProcess {
 		if (isContainKeyword(origin.getBrief(), "bankVATAndAdditionalTax")) {
 			double rate = this.CJ_Tax_Rate + this.JY_Tax_Rate + this.DFJY_Tax_Rate;
 			double vatMount = origin.getAmout() / (1 + rate);
-			JinDieRecord vta_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType())); // 增值税
+			JinDieRecord vta_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin)); // 增值税
 			vta_record.set借方金额(vatMount);
 			vta_record.set科目名称("未交增值税");
 			vta_record.set科目代码(classficationService.getByNameAndCompanyName("未交增值税", companyName).get编码());
 
-			JinDieRecord cj_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType()));
+			JinDieRecord cj_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin));
 			cj_record.set借方金额(vatMount * this.CJ_Tax_Rate / rate);
 			cj_record.set科目名称("应交城市维护建设税");
 			cj_record.set科目代码(classficationService.getByNameAndCompanyName("应交城市维护建设税", companyName).get编码());
 
-			JinDieRecord jy_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType()));
+			JinDieRecord jy_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin));
 			jy_record.set借方金额(vatMount * this.JY_Tax_Rate / rate);
 			jy_record.set科目名称("教育费附加");
 			jy_record.set科目代码(classficationService.getByNameAndCompanyName("教育费附加", companyName).get编码());
 
-			JinDieRecord dfjy_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType()));
+			JinDieRecord dfjy_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin));
 			dfjy_record.set借方金额(vatMount * this.DFJY_Tax_Rate / rate);
 			dfjy_record.set科目名称("地方教育费附加");
 			dfjy_record.set科目代码(classficationService.getByNameAndCompanyName("地方教育费附加", companyName).get编码());
@@ -967,8 +544,8 @@ public class OriginProcessImpl implements OriginProcess {
 		}
 		// 单独增值税
 		else if (isContainKeyword(origin.getBrief(), "bankVAT")) {
-			JinDieRecord vta_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType())); // 增值税
+			JinDieRecord vta_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin)); // 增值税
 			vta_record.set借方金额(origin.getAmout());
 			vta_record.set科目名称("未交增值税");
 			vta_record.set科目代码(classficationService.getByNameAndCompanyName("未交增值税", companyName).get编码());
@@ -978,20 +555,20 @@ public class OriginProcessImpl implements OriginProcess {
 		else if (isContainKeyword(origin.getBrief(), "bankAdditionanlTax")) {
 			double rate = this.CJ_Tax_Rate + this.JY_Tax_Rate + this.DFJY_Tax_Rate;
 			double amout = origin.getAmout();
-			JinDieRecord cj_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType()));
+			JinDieRecord cj_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin));
 			cj_record.set借方金额(amout * this.CJ_Tax_Rate / rate);
 			cj_record.set科目名称("应交城市维护建设税");
 			cj_record.set科目代码(classficationService.getByNameAndCompanyName("应交城市维护建设税", companyName).get编码());
 
-			JinDieRecord jy_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType()));
+			JinDieRecord jy_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin));
 			jy_record.set借方金额(amout * this.JY_Tax_Rate / rate);
 			jy_record.set科目名称("教育费附加");
 			jy_record.set科目代码(classficationService.getByNameAndCompanyName("教育费附加", companyName).get编码());
 
-			JinDieRecord dfjy_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType()));
+			JinDieRecord dfjy_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin));
 			dfjy_record.set借方金额(amout * this.DFJY_Tax_Rate / rate);
 			dfjy_record.set科目名称("地方教育费附加");
 			dfjy_record.set科目代码(classficationService.getByNameAndCompanyName("地方教育费附加", companyName).get编码());
@@ -1000,8 +577,8 @@ public class OriginProcessImpl implements OriginProcess {
 		}
 		// 企业所得税
 		else if (isContainKeyword(origin.getBrief(), "bankIncomeTax")) {
-			JinDieRecord qysd_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType()));
+			JinDieRecord qysd_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin));
 			qysd_record.set借方金额(origin.getAmout());
 			qysd_record.set科目名称("所得税费用");
 			qysd_record.set科目代码(classficationService.getByNameAndCompanyName("所得税费用", companyName).get编码());
@@ -1010,8 +587,8 @@ public class OriginProcessImpl implements OriginProcess {
 		}
 		// 个人所得税
 		else if (isContainKeyword(origin.getBrief(), "bankPersonalTax")) {
-			JinDieRecord grsd_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType()));
+			JinDieRecord grsd_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin));
 			grsd_record.set借方金额(origin.getAmout());
 			grsd_record.set科目名称("应交个人所得税");
 			grsd_record.set科目代码(classficationService.getByNameAndCompanyName("应交个人所得税", companyName).get编码());
@@ -1021,8 +598,8 @@ public class OriginProcessImpl implements OriginProcess {
 		// 其他归集到管理费用税金
 		else {
 
-			JinDieRecord iq_record = createRecord(origin, getEntryNum(origin.getType()),
-					getEntryItemNum(origin.getType()));
+			JinDieRecord iq_record = createRecord(origin, this.entryHelper.genEntryNum(origin),
+					this.entryHelper.genItemNum(origin));
 			iq_record.set借方金额(origin.getAmout());
 			iq_record.set科目名称("归集为管理费的税费");
 			iq_record.set科目代码(classficationService.getByNameAndCompanyName("归集为管理费的税费", companyName).get编码());
@@ -1031,10 +608,49 @@ public class OriginProcessImpl implements OriginProcess {
 		}
 
 		// 贷方的银行记录
-		JinDieRecord bank_record = creatBankRecord(origin, getEntryNum(origin.getType()),
-				getEntryItemNum(origin.getType()));
+		JinDieRecord bank_record = creatBankRecord(origin, this.entryHelper.genEntryNum(origin),
+				this.entryHelper.genItemNum(origin));
 		jinDieRecords.add(bank_record);
 
 		return jinDieRecords;
 	}
+
+	// 有关charge person 的账户，单独的归为一类 bank_defChargetperson
+	private void setOtherAccountType(Origin origin, String type) {
+		if (origin.getRelative_account()
+				.equals(companyProperties.getCompanies().get(this.companyName).get("defChargePerson"))) {
+			origin.setType(OriginType.BanK_DefChargePerson.value);
+		} else {
+
+			origin.setType(type);
+		}
+
+	}
+
+	// 必须每个会计期间共享一个实例，不然会产生凭证号的混乱
+	private class EntryHelper {
+
+		private Map<String, List<Integer>> map = new HashMap<>();
+
+		public void initMap() {
+			int start = 200;
+			for (OriginType originType : OriginType.values()) {
+				map.put(originType.value, List.of(start++, 0));
+			}
+		}
+
+		public int genEntryNum(Origin origin) {
+			return map.get(origin.getType()).get(0);
+		}
+
+		public int genItemNum(Origin origin) {
+			int num = map.get(origin.getType()).get(1);
+			map.put(origin.getType(), List.of(map.get(origin.getType()).get(0), ++num)); // 更新map
+			return num;
+		}
+	}
+
+	
+	
+
 }

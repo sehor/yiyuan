@@ -51,7 +51,7 @@ props:
         bankFee: 560303
         DefaultVTARate: 0.13
         personSecurityAmout: 5156
-         
+        defChargePerson: 张宗兵
      AOKJ: 
         name: 深圳市安欧科技有限公司 
         cost: 520201
@@ -62,6 +62,7 @@ props:
         bankFee: 560303
         DefaultVTARate: 0.06
         personSecurityAmout: 214
+        defChargePerson: 涂建华
      CHKJ: 
         name: 深圳市创和技术有限公司 
         cost: 140501
@@ -72,4 +73,5 @@ props:
         bankFee: 560303
         DefaultVTARate: 0.13
         personSecurityAmout: 421
+        defChargePerson: 郑茂
       

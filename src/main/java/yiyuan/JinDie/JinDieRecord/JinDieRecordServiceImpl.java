@@ -82,13 +82,26 @@ OriginProcess originProcess;
 						origins=origins.stream().filter(e->e.getType().contains(type)).collect(Collectors.toList());
 						List<JinDieRecord> recordsInOnePreriod=originProcess.setCompanyName(companyName).proccessToRecord(origins, currentEnd);
 						records.addAll(recordsInOnePreriod);
-						
+						sortRecords(records);
 						currentBegin=currentBegin.plusMonths(1);
 						currentEnd=currentBegin.with(TemporalAdjusters.lastDayOfMonth());	
 						
 					}
 					
 				return records;
+	}
+	
+	private void sortRecords(List<JinDieRecord> records) {
+		records.sort((o1,o2)->{
+			int diff1 = o1.get凭证号() - o2.get凭证号(), diff2 = o1.get分录序号() - o2.get分录序号();
+
+			if (diff1 != 0) {
+				return diff1;
+			} else {
+				return diff2;
+			}	
+		});
+
 	}
 	
 }
