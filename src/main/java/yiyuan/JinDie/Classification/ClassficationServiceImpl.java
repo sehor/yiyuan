@@ -4,6 +4,7 @@ import java.io.File;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 
 import yiyuan.JinDie.Origin.Origin;
@@ -52,8 +53,9 @@ public class ClassficationServiceImpl implements ClassficationService {
 	}
 
 	@Override
+	@Cacheable("classfication")
 	public Classfication getByName(String 名称) {
-		// TODO Auto-generated method stub
+		 System.out.println("调用方法:getByName(名称)");
 		List<Classfication> list = repository.findBy名称(名称);
 		if (list.size() <= 0)
 			return null;

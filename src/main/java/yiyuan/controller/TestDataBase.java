@@ -15,6 +15,7 @@ import yiyuan.JinDie.OriginType;
 import yiyuan.JinDie.Classification.ClassficationRepository;
 import yiyuan.JinDie.Origin.Origin;
 import yiyuan.JinDie.Origin.OriginRepository;
+import yiyuan.other.chache.TestCache;
 
 @RestController
 @RequestMapping("/testDataBase")
@@ -24,6 +25,8 @@ public class TestDataBase {
 	OriginRepository originRepository;
 	@Autowired
 	ClassficationRepository claRepository;
+	
+
 	
 	
 	@GetMapping("/customers/{companyName}")

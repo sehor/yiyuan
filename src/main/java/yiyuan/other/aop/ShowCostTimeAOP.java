@@ -16,7 +16,7 @@ public class ShowCostTimeAOP {
 	private Long start;
 
 	// @Pointcut("@annotation(yiyuan.other.annotation.TimeCost)")
-	@Pointcut(value = "execution(* yiyuan..*.*(..))")
+	@Pointcut(value = "execution(* yiyuan..*ServiceImpl*.*(..))")
 	public void showCostTime() {
 
 	}
@@ -40,7 +40,7 @@ public class ShowCostTimeAOP {
 	public void after(JoinPoint jp) {
 
 		long cost = new Date().getTime() - start;
-		if (cost > 10)
+		    if (cost > 5)
 			System.out.println(jp.getSignature().getName() + " cost " + cost + " 毫秒");
 	}
 }

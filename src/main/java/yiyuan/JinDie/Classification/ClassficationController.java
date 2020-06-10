@@ -29,6 +29,11 @@ public class ClassficationController {
 	public Classfication getClassfication(@PathVariable(value = "id") String id) {
 		return service.getClassfication(id);
 	}
+	
+	@GetMapping("/getByName/{name}")
+	public Classfication getClassficationByName(@PathVariable(value = "name") String name) {
+		return service.getByName(name);
+	}
 
 	@PutMapping("/update")
 	public Classfication update(@RequestBody Classfication classfication) {

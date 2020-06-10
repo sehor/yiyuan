@@ -113,7 +113,7 @@ public class YiyuanApplicationTests {
 		});
 	}
 
-	@Test
+	//@Test
 	public void test3() {
          String ostr="短信服务费";
 		 String[] strs=companyPro.getKeyword().get("bankFee").split("\\|");
@@ -125,6 +125,15 @@ public class YiyuanApplicationTests {
 		 }
 		 pt(false);
 	}
+	
+	@Test
+	public void cacheTest() {
+		
+		claService.getByName("银行存款");
+		
+	}
+	
+	
 	
 	
 	private void pt(Object o) {
