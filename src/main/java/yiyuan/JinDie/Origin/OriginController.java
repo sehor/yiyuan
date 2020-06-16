@@ -103,11 +103,11 @@ public class OriginController {
 	@GetMapping("/preriod/record")
 	public List<JinDieRecord> getRecordInPreriod(
 			@RequestParam(value = "companyName", defaultValue = "CHKJ") String companyName,
-			@RequestParam(value = "begin", defaultValue = "2018-09-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
-			@RequestParam(value = "end", defaultValue = "2018-09-30") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+			@RequestParam(value = "begin", defaultValue = "2018-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+			@RequestParam(value = "end", defaultValue = "2018-10-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
 		
-		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.Accrued_SalaryAndSecurity.value);
+		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.Issue_Invoice.value);
 
 		process.recordWriteToFile("C:\\Users\\pzr\\Desktop\\record-创和.xlsx", records);
 

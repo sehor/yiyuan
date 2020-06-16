@@ -42,4 +42,10 @@ public interface ClassficationService {
 	
 	@Cacheable("classfication")
 	public String getNumber(List<Classfication> classfications,String companyName,String rootAccountName);
+	
+	public String createMutilName(Classfication classfication);
+	
+	public void initMutilName(List<Classfication> classfications);
+	
+	public String getNumByMutilName(String mutilName);
 }

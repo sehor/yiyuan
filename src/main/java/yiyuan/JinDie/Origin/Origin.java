@@ -71,7 +71,8 @@ public class Origin {
 	private Double payedPersonSecurity=Double.valueOf(0);
 	private Double payedCompanySecurity=Double.valueOf(0);
 	
-	
+	private String income_account;  //对应的type为Issue_invoice的origin应计入哪个收入科目
+	private String payable_account; //对应的type为Receive_invoice的origin应计入哪个成本费用科目 
 	
 	
 	public String getInvoice_number() {
@@ -230,6 +231,18 @@ public class Origin {
 	@SuppressWarnings("deprecation")
 	public void setPayedCompanySecurity(Double payedCompanySecurity) {
 		this.payedCompanySecurity = new BigDecimal(payedCompanySecurity).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+	}
+	public String getIncome_account() {
+		return income_account;
+	}
+	public void setIncome_account(String income_account) {
+		this.income_account = income_account;
+	}
+	public String getPayable_account() {
+		return payable_account;
+	}
+	public void setPayable_account(String payable_account) {
+		this.payable_account = payable_account;
 	}
 
 	

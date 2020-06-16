@@ -9,7 +9,7 @@ import org.junit.Test;
 
 public class NoSpringTest {
 
-	@Test
+	//@Test
 	public void test1() {
 
         Map<String,List<Integer>> map=new HashMap<>();
@@ -32,6 +32,15 @@ public class NoSpringTest {
         
         pt(map.get(name1));
         pt(list);
+	}
+	
+	@Test
+	public void test2() {
+		Map<String,Double> map=new HashMap<>();
+		map.put("a",23.0);
+		Double b=map.get("a")!=null?map.get("a"):0;
+		
+		pt(b);
 	}
 
 	

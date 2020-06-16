@@ -55,7 +55,7 @@ public class ClassficationServiceImpl implements ClassficationService {
 	@Override
 	@Cacheable("classfication")
 	public Classfication getByName(String 名称) {
-		 System.out.println("调用方法:getByName(名称)");
+		System.out.println("调用方法:getByName(名称)");
 		List<Classfication> list = repository.findBy名称(名称);
 		if (list.size() <= 0)
 			return null;
@@ -65,7 +65,8 @@ public class ClassficationServiceImpl implements ClassficationService {
 	public String getNumber(String name, String companyName, String rootName) {
 
 		Classfication root = getByNameAndCompanyName(rootName, companyName);
-		if(root==null) return "未找到";
+		if (root == null)
+			return "未找到";
 		List<Classfication> list = repository.findBy名称AndCompanyName(name, companyName);
 		for (Classfication classfication : list) {
 			if (classfication.get编码().startsWith(root.get编码())) {
@@ -100,7 +101,8 @@ public class ClassficationServiceImpl implements ClassficationService {
 	@Override
 	public String getNumber(List<Classfication> classfications, String companyName, String rootAccountName) {
 		Classfication root = getByNameAndCompanyName(rootAccountName, companyName);
-		if(root==null) return null;
+		if (root == null)
+			return null;
 		for (Classfication classfication : classfications) {
 
 			if (classfication.get编码().startsWith(root.get编码())) {
@@ -110,11 +112,39 @@ public class ClassficationServiceImpl implements ClassficationService {
 		return null;
 
 	}
-	
-	
-	public boolean isReceiveable(Origin origin,List<Classfication> classfications) {
-		
+
+	public boolean isReceiveable(Origin origin, List<Classfication> classfications) {
+
 		return false;
+	}
+
+	@Override
+	public String createMutilName(Classfication classfication) {
+		// TODO Auto-generated method stub
+		String parentName = "未找到";
+		String sonNum = classfication.get编码();
+		String num = sonNum.substring(0, sonNum.length() - 2); // 编码格式 xxxx.xx.xx.xx
+		List<Classfication> classfications = repository.findBy编码(num);
+		if (classfications.size() < 1)
+			return "未找到上级科目";
+		parentName = classfications.get(0).get名称();
+		return parentName + "-" + classfication.get名称();
+	}
+
+	@Override
+	public void initMutilName(List<Classfication> classfications) {
+		classfications.forEach(e -> {
+              e.setMutilName(createMutilName(e));
+		});
+		
+		repository.saveAll(classfications);
+	}
+
+	@Override
+	public String getNumByMutilName(String mutilName){
+		List<Classfication> classfications=repository.findByMutilName(mutilName);
+		if(classfications.size()<=0) return "未找到";
+		return classfications.get(0).get编码();
 	}
 
 }

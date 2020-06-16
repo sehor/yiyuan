@@ -33,6 +33,7 @@ public class Classfication {
 	
 	private String companyName;
 	
+	private String mutilName;
 
 	public String getCompanyName() {
 		return companyName;
@@ -81,4 +82,14 @@ public class Classfication {
 	public String get余额方向() {
 		return this.余额方向;
 	}
+
+	public String getMutilName() {
+		return mutilName;
+	}
+
+	public void setMutilName(String mutilName) {
+		this.mutilName = mutilName;
+	}
+	
+	
 }

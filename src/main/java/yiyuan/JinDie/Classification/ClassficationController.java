@@ -7,6 +7,7 @@ import io.swagger.annotations.ApiResponse;
 
 import java.io.File;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.ui.Model;
@@ -58,11 +59,24 @@ public class ClassficationController {
 		  service.SaveAll(classfications);
 		  return classfications;
 	}
+	
+	@GetMapping("/initMutilName/{companyName}")
+	public String initMutilname(@PathVariable("companyName") String companyName) {
+		
+		service.initMutilName(service.getAll());
+		return "done";
+	}
 		
 	@GetMapping("/all")
 	public List<Classfication> getAll(){
 		
 		return service.getAll();
+		
+	}
+	@GetMapping("/all/{companyName}")
+	public List<Classfication> getAll(@PathVariable("companyName") String companyName){
+		
+		return service.getAll().stream().filter(e->e.getCompanyName().equalsIgnoreCase(companyName)).collect(Collectors.toList());
 		
 	}
 	
