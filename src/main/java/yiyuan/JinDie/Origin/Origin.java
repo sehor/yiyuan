@@ -68,6 +68,10 @@ public class Origin {
 	private Double invoice_amount=Double.valueOf(0);
 	private Double invoice_tax=Double.valueOf(0);
 	
+	private Double payedPersonSecurity=Double.valueOf(0);
+	private Double payedCompanySecurity=Double.valueOf(0);
+	
+	
 	
 	
 	public String getInvoice_number() {
@@ -165,20 +169,21 @@ public class Origin {
 		return amout;
 	}
 	public void setAmout(Double amout) {
-		this.amout = new BigDecimal(amout).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();;
+		this.amout = new BigDecimal(amout).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
 	public Double getBank_income() {
 		return bank_income;
 	}
 	public void setBank_income(Double bank_income) {
-		this.bank_income = new BigDecimal(bank_income).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();;
+		this.bank_income = new BigDecimal(bank_income).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
 	public Double getBank_pay() {
 		return bank_pay;
 	}
 	public void setBank_pay(Double bank_pay) {
-		this.bank_pay = new BigDecimal(bank_pay).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();;
-	}
+		this.bank_pay = new BigDecimal(bank_pay).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+		}
+	
 	public String getRelative_account() {
 		return relative_account;
 	}
@@ -208,6 +213,23 @@ public class Origin {
 	}
 	public void setBank_brief2(String bank_brief2) {
 		this.bank_brief2 = bank_brief2;
+	}
+	
+	
+	public Double getPayedPersonSecurity() {
+		return payedPersonSecurity;
+	}
+	
+	@SuppressWarnings("deprecation")
+	public void setPayedPersonSecurity(Double payedPersonSecurity) {
+		this.payedPersonSecurity = new BigDecimal(payedPersonSecurity).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
+	}
+	public Double getPayedCompanySecurity() {
+		return payedCompanySecurity;
+	}
+	@SuppressWarnings("deprecation")
+	public void setPayedCompanySecurity(Double payedCompanySecurity) {
+		this.payedCompanySecurity = new BigDecimal(payedCompanySecurity).setScale(2, BigDecimal.ROUND_HALF_UP).doubleValue();
 	}
 
 	

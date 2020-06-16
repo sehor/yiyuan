@@ -48,6 +48,7 @@ OriginRepository repository;
 	@Override
 	public List<Origin> getInPeriod(String companyName, LocalDate begin, LocalDate end) {
 		// TODO Auto-generated method stub
+		
 		return repository.findInPeriod(companyName, begin, end);
 	}
 	@Override

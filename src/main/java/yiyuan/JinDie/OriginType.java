@@ -15,8 +15,9 @@ public enum OriginType {
 	Bank_Pay_OtherPayable(113, "Bank_Pay_OtherPayable"), Bank_Pay_Other(114, "Bank_Pay_Other"),Bank_Pay_OtherReceivable(115,"Bank_Pay_OtherReceivable"),
 	Bank_Pay_Receivable(116,"Bank_Pay_Receivable"),
 	BanK_DefChargePerson(117,"Bank_Pay_DefChargePersion"),
+	
 	Issue_Invoice(200, "Issue_Invoice"), Receive_Invoice(300, "Receive_Invoice"), Handle_VTA(400, "Handle_VTA"),
-	Accrued_Salary(500, "Accrued_Salary");
+	Accrued_SalaryAndSecurity(500, "Accrued_SalaryAndSecurity");
 
 	
 	public final int key;

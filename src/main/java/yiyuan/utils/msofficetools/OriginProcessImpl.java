@@ -54,13 +54,15 @@ public class OriginProcessImpl implements OriginProcess {
 		this.entryHelper.initMap(); // 初始化
 
 		List<JinDieRecord> records = new ArrayList<>();
-		records.addAll(proccessBankToRecord(origins, date));
-		/*
+		
+		/*records.addAll(proccessBankToRecord(origins, date));
+		
 		 * records.addAll(processIssueInvoiceToRecords(origins, date));
 		 * records.addAll(processReceiveInvoiceToRecords(origins, date));
 		 * records.addAll(processHandleVTAToRecords(origins, date));
-		 * records.addAll(processSalaryToRecords(origins, date));
 		 */
+		  records.addAll(processSalaryToRecords(origins, date));
+		
 		return records;
 	}
 
@@ -199,7 +201,7 @@ public class OriginProcessImpl implements OriginProcess {
 
 	private List<JinDieRecord> processSalaryToRecords(List<Origin> origins, LocalDate date) {
 
-		List<Origin> list = origins.stream().filter(e -> e.getType().equals("Accrued_Salary"))
+		List<Origin> list = origins.stream().filter(e -> e.getType().contains("Accrued_Salary"))
 				.collect(Collectors.toList());
 		List<JinDieRecord> records = new ArrayList<>();
 		if (list.size() <= 0)
@@ -207,37 +209,91 @@ public class OriginProcessImpl implements OriginProcess {
 
 		for (Origin origin : list) {
 			// System.out.println("salary: " + origin.getSalary_payable());
-			for (int i = 0; i >= 4; i++) {
-				JinDieRecord record = new JinDieRecord();
-				record.set日期(date);
-				record.set凭证字("记");
-				record.set凭证号(this.entryHelper.genEntryNum(origin));
-				record.set摘要("计提工资");
-
-				record.set分录序号(this.entryHelper.genItemNum(origin));
-
-				records.add(record);
+			JinDieRecord record_fee=createRecord(origin, this.entryHelper.genEntryNum(origin), this.entryHelper.genItemNum(origin));
+			record_fee.set摘要("计提工资");
+			record_fee.set借方金额(origin.getBasicSalary());
+			record_fee.set科目名称("工资费用");
+			record_fee.set科目代码(getAccountNum("工资费用"));
+			records.addAll(List.of(record_fee));
+			
+			//如果有单位社保费计提社保
+			if(origin.getPayedCompanySecurity()>0.01) {
+			JinDieRecord record_comSecu=createRecord(origin, this.entryHelper.genEntryNum(origin), this.entryHelper.genItemNum(origin));
+			record_comSecu.set摘要("计提社保费用");
+			record_comSecu.set借方金额(origin.getPayedCompanySecurity());
+			record_comSecu.set科目名称("社会保险费（单位）");
+			record_comSecu.set科目代码(getAccountNum("社会保险费（单位）"));
+			
+			
+			
+			JinDieRecord record_comSecu1=createRecord(origin, this.entryHelper.genEntryNum(origin), this.entryHelper.genItemNum(origin));
+			record_comSecu1.set摘要("计提社保费");
+			record_comSecu1.set贷方金额(origin.getPayedCompanySecurity());
+			record_comSecu1.set科目名称("应交社会保险费（单位）");
+			record_comSecu1.set科目代码(getAccountNum("应交社会保险费（单位）"));
+	
+			records.addAll(List.of(record_comSecu,record_comSecu1));
 			}
-			records.get(0).set借方金额(origin.getBasicSalary());// 未交增值税
-			records.get(0).set科目代码(getAccountNum("工资费用"));
-			// records.get(0).set科目代码(getAccountNum("研发费用"));
-
-			records.get(1).set贷方金额(origin.getSalary_security());// 转出未交增值税
-			records.get(1).set科目代码(getAccountNum("应交社保"));
-
-			records.get(2).set借方金额(origin.getSalary_funds()); // 税金及附加
-			records.get(2).set科目代码(getAccountNum("应交公积金"));
-
-			records.get(3).set贷方金额(origin.getSalary_personTax());// 城建税
-			records.get(3).set科目代码(getAccountNum("应交个人所得税"));
-
-			records.get(4).set贷方金额(origin.getSalary_payable());// 教育费
-			records.get(4).set科目代码(getAccountNum("应付工资"));
+			
+			//如果有个人社保费计提社保
+			if(origin.getPayedPersonSecurity()>0.01) {
+			JinDieRecord record_perSecu=createRecord(origin, this.entryHelper.genEntryNum(origin), this.entryHelper.genItemNum(origin));
+			record_perSecu.set摘要("计提社保");
+			record_perSecu.set贷方金额(origin.getPayedPersonSecurity());
+			record_perSecu.set科目名称("应交社会保险费（个人）");
+			record_perSecu.set科目代码(getAccountNum("应交社会保险费（个人）"));
+			records.addAll(List.of(record_perSecu));
+			}
+			
+			
+			//如果有个人所得税计提个人所得税
+			if(origin.getSalary_personTax()>0.01) {
+			JinDieRecord record_perTax=createRecord(origin, this.entryHelper.genEntryNum(origin), this.entryHelper.genItemNum(origin));
+			record_perTax.set摘要("计提个人所得税");
+			record_perTax.set贷方金额(origin.getSalary_personTax());
+			record_perTax.set科目名称("应交个人所得税");
+			record_perTax.set科目代码(getAccountNum("应交个人所得税"));
+			records.addAll(List.of(record_perTax));
+			}
+			
+			
+			//如果有公积金计提公积金
+			if(origin.getSalary_funds()>0.01) {
+			JinDieRecord record_fund=createRecord(origin, this.entryHelper.genEntryNum(origin), this.entryHelper.genItemNum(origin));
+			record_fund.set摘要("计提公积金");
+			record_fund.set借方金额(origin.getSalary_funds()/2);// 单位和个人平分
+			record_fund.set科目名称("公积金费用");
+			record_fund.set科目代码(getAccountNum("公积金费用"));
+			
+			JinDieRecord record_fund1=createRecord(origin, this.entryHelper.genEntryNum(origin), this.entryHelper.genItemNum(origin));
+			record_fund1.set摘要("计提公积金");
+			record_fund1.set贷方金额(origin.getSalary_funds()/2); // 单位和个人平分
+			record_fund1.set科目名称("应交公积金（个人）");
+			record_fund1.set科目代码(getAccountNum("应交公积金（个人）"));
+			
+			JinDieRecord record_fund2=createRecord(origin, this.entryHelper.genEntryNum(origin), this.entryHelper.genItemNum(origin));
+			record_fund2.set摘要("计提公积金");
+			record_fund2.set贷方金额(origin.getSalary_funds()/2); // 单位和个人平分
+			record_fund2.set科目名称("应交公积金（单位）");
+			record_fund2.set科目代码(getAccountNum("应交公积金（单位）"));
+			records.addAll(List.of(record_fund,record_fund1,record_fund2));
+			}
+			
+			//应付工资
+			JinDieRecord record_salaryPayable=createRecord(origin, this.entryHelper.genEntryNum(origin), this.entryHelper.genItemNum(origin));
+			record_salaryPayable.set摘要("计提工资");
+			record_salaryPayable.set贷方金额(origin.getBasicSalary()-origin.getPayedPersonSecurity()-origin.getSalary_funds()/2-origin.getSalary_personTax());// 单位和个人平分
+			record_salaryPayable.set科目名称("应付工资");
+			record_salaryPayable.set科目代码(getAccountNum("应付工资"));
+			records.addAll(List.of(record_salaryPayable));
 		}
 
 		return records;
 
 	}
+	
+	
+	
 
 	public void recordWriteToFile(String path, List<JinDieRecord> records) {
 

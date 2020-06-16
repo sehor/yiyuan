@@ -12,5 +12,6 @@ public interface BeansToXLSTransform<T> {
     public String[] createColumnTitles();
     public Map<Integer, Field> fieldColumnMap();
     public HSSFWorkbook createWorkbook(List<T> beans);
+    public void writeToFile(String fileName,List<T> list);
 
 }

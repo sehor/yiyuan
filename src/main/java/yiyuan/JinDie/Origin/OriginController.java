@@ -80,10 +80,11 @@ public class OriginController {
 	}
 
 	@GetMapping("/preriod/origin")
-	public List<Origin> getOriginInPreriod(@RequestParam(value = "name", defaultValue = "CHKJ") String companyName,
+	public List<Origin> getOriginInPreriod(@RequestParam(value = "companyName") String companyName,
 			@RequestParam(value = "begin", defaultValue = "2018-09-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
 			@RequestParam(value = "end", defaultValue = "2018-09-30") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
+	
 		List<Origin> origins = service.getInPeriod(companyName, begin, end);
 		origins = origins.stream().filter(e -> e.getType().contains("Bank")).collect(Collectors.toList());
 		origins = process.setCompanyName(companyName).preProcessOrigin(origins);
@@ -101,11 +102,12 @@ public class OriginController {
 
 	@GetMapping("/preriod/record")
 	public List<JinDieRecord> getRecordInPreriod(
-			@RequestParam(value = "name", defaultValue = "CHKJ") String companyName,
+			@RequestParam(value = "companyName", defaultValue = "CHKJ") String companyName,
 			@RequestParam(value = "begin", defaultValue = "2018-09-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
 			@RequestParam(value = "end", defaultValue = "2018-09-30") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
-		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.BanK.value);
+		
+		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.Accrued_SalaryAndSecurity.value);
 
 		process.recordWriteToFile("C:\\Users\\pzr\\Desktop\\record-创和.xlsx", records);
 
