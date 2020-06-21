@@ -11,5 +11,5 @@ public interface ClassficationRepository extends MongoRepository<Classfication, 
 	List<Classfication> findBy名称AndCompanyName(String 名称,String companyName);
 	List<Classfication> findByCompanyName(String companyName);
     List<Classfication> findBy编码(String num);
-    List<Classfication> findByMutilName(String mutilName);
+    List<Classfication> findByMutilNameAndCompanyName(String mutilName,String companyName);
 }

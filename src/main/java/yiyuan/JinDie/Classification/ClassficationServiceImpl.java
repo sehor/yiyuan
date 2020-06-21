@@ -121,12 +121,12 @@ public class ClassficationServiceImpl implements ClassficationService {
 	@Override
 	public String createMutilName(Classfication classfication) {
 		// TODO Auto-generated method stub
-		String parentName = "未找到";
+		String parentName = "";
 		String sonNum = classfication.get编码();
 		String num = sonNum.substring(0, sonNum.length() - 2); // 编码格式 xxxx.xx.xx.xx
 		List<Classfication> classfications = repository.findBy编码(num);
 		if (classfications.size() < 1)
-			return "未找到上级科目";
+			return classfication.get名称();
 		parentName = classfications.get(0).get名称();
 		return parentName + "-" + classfication.get名称();
 	}
@@ -141,8 +141,8 @@ public class ClassficationServiceImpl implements ClassficationService {
 	}
 
 	@Override
-	public String getNumByMutilName(String mutilName){
-		List<Classfication> classfications=repository.findByMutilName(mutilName);
+	public String getNumByMutilName(String mutilName,String companyName){
+		List<Classfication> classfications=repository.findByMutilNameAndCompanyName(mutilName,companyName);
 		if(classfications.size()<=0) return "未找到";
 		return classfications.get(0).get编码();
 	}

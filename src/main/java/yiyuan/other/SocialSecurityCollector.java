@@ -17,7 +17,7 @@ import yiyuan.JinDie.OriginType;
 import yiyuan.JinDie.Origin.Origin;
 import yiyuan.utils.msofficetools.ExcelUtil;
 
-public class SocialSecurityCllector implements Visitor {
+public class SocialSecurityCollector implements Visitor {
 
 	
 	private List<Origin> records = new ArrayList<>();

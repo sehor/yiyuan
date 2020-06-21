@@ -77,11 +77,17 @@ OriginProcess originProcess;
 					LocalDate currentEnd=begin.with(TemporalAdjusters.lastDayOfMonth()); //当前会计期间最后一天
 					LocalDate currentBegin=LocalDate.of(begin.getYear(), begin.getMonth(), 1);//当前会计期间第一天
 					
-					while(!currentEnd.isAfter(end)) {
-						//System.out.println(currentBegin+" "+currentEnd);
+					while(!currentBegin.isAfter(end)) {
+						
 						List<Origin> origins=originService.getInPeriod(companyName, currentBegin, currentEnd);
+						
+						origins=origins.stream().filter(e->e.getType().contains(type)).collect(Collectors.toList()); //type过滤
+						
+						
 						origins=originProcess.setCompanyName(companyName).preProcessOrigin(origins);
-						origins=origins.stream().filter(e->e.getType().contains(type)).collect(Collectors.toList());
+						
+						
+						
 						List<JinDieRecord> recordsInOnePreriod=originProcess.setCompanyName(companyName).proccessToRecord(origins, currentEnd);
 						sortRecords(recordsInOnePreriod);
 						records.addAll(recordsInOnePreriod);

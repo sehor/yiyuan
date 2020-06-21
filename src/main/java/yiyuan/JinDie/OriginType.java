@@ -7,7 +7,7 @@ public enum OriginType {
 	Bank_Income_OtherReceivable(103, "Bank_Income_OtherReceivable"),
 
 	Bank_Income_OtherPayable(104, "Bank_Income_OtherPayable"), Bank_Income_Interest(105, "Bank_Income_Interest"),
-	Bank_Income_Other(106, "Bank_Income_Other"),
+	Bank_Income_Other(106, "Bank_Income_Other"),Bank_Income_Payable(118, "Bank_Income_Payable"),
 
 	Bank_Pay_Payable(107, "Bank_Pay_Payable"), Bank_Pay_Salary(108, "Bank_Pay_Salary"),
 	Bank_Pay_Expensive(109, "Bank_Pay_Expensive"), Bank_Pay_Tax(110, "Bank_Pay_Tax"),

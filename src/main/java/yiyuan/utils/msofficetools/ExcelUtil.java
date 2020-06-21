@@ -7,6 +7,9 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.List;
+import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
@@ -123,9 +126,11 @@ public class ExcelUtil {
 								DateTimeFormatter.ofPattern("yyyyMMdd")));
 					} catch (Exception date_e) {
 						try {
+							
 							field.set(t, LocalDate.parse(value.substring(0, "yyyy-MM-dd".length()),
 									DateTimeFormatter.ofPattern("yyyy-MM-dd")));
 						}catch(Exception date_e1) {
+							
 							field.set(t, LocalDate.parse(value.substring(0, "yyyy/MM/dd".length()),
 									DateTimeFormatter.ofPattern("yyyy/MM/dd")));
 						}
@@ -149,4 +154,9 @@ public class ExcelUtil {
 		return new BigDecimal(f).setScale(2,BigDecimal.ROUND_HALF_UP).floatValue();
 		
 	}
+    
+	public static <T> List<T> filter(List<T> list,Predicate<T> predicate){
+    	list=list.stream().filter(predicate).collect(Collectors.toList());
+		return list;	
+    }
 }

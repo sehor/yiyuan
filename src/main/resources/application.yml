@@ -19,9 +19,9 @@ props:
   Keyword:
      bankTax: 协议扣税|缴税
        
-     bankFee: 手续费|收费项目|短信服务费
+     bankFee: 手续费|收费项目|短信服务费|收费
 
-     bankSecurity: 社保|社会保险
+     bankSecurity: 社保|社会保险|社保费
 
      bankSalary: 工资|发放工资
        

@@ -32,7 +32,7 @@ import yiyuan.JinDie.Classification.ClassficationService;
 import yiyuan.JinDie.Origin.Origin;
 import yiyuan.JinDie.Origin.OriginService;
 import yiyuan.other.FileStructure;
-import yiyuan.other.VTACllector;
+import yiyuan.other.VATCollector;
 import yiyuan.utils.CompanyProperties;
 import yiyuan.utils.msofficetools.BeansToXLSTransform;
 import yiyuan.utils.msofficetools.DefaultBeansToXLSTransform;
@@ -80,7 +80,7 @@ public class YiyuanApplicationTests {
 
 		
 		 FileStructure fs=new FileStructure("D:\\work\\finace\\创和\\各种申报表");
-		 VTACllector visitor=new VTACllector();
+		 VATCollector visitor=new VATCollector();
 		 fs.handle(visitor);
 		 List<Origin> origins=new ArrayList<>();
 		 visitor.getRecords().forEach(e->{

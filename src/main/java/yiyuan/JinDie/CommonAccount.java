@@ -7,7 +7,7 @@ public enum CommonAccount {
 	YJGRGJJ("其他应付款-应交公积金（个人）"),YJDWGJJ("其他应付款-应交公积金（单位）"),YJDWSB("其他应付款-应交社会保险费（单位）"),
 	YJGRSB("其他应付款-应交社会保险费（个人）"),
 	
-	ZZSXXS("应交增值税-销项税额");
+	ZZSXXS("应交增值税-销项税额"),ZZSJXS("应交增值税-进项税额");
 	
 	
 	public final String val;

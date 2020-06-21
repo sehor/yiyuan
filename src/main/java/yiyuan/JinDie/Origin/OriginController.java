@@ -5,6 +5,7 @@ import yiyuan.JinDie.OriginType;
 import yiyuan.JinDie.JinDieRecord.JinDieRecord;
 import yiyuan.JinDie.JinDieRecord.JinDieRecordService;
 import yiyuan.utils.msofficetools.DefaultBeansToXLSTransform;
+import yiyuan.utils.msofficetools.ExcelUtil;
 import yiyuan.utils.msofficetools.OriginProcess;
 import yiyuan.utils.msofficetools.ReadDataFromExcel;
 
@@ -56,9 +57,11 @@ public class OriginController {
 		return list;
 	}
 
-	@GetMapping("/all")
-	public List<Origin> getAll() {
+	@GetMapping("/all/{companyName}")
+	public List<Origin> getAll(@PathVariable("companyName") String companyName) {
 		List<Origin> list = service.getAll();
+		list=ExcelUtil.filter(list, e->e.getCompanyName().equals(companyName));
+		//list=ExcelUtil.filter(list, e->e.getType().contains(OriginType.BanK.value));
 		return list;
 	}
 
@@ -66,50 +69,51 @@ public class OriginController {
 	public List<Origin> operations() {
 		List<Origin> list = service.getAll();
 		list = list.stream().filter(
-				e -> e.getCompanyName().equals("CHKJ") && e.getType().equalsIgnoreCase(OriginType.Issue_Invoice.value))
+				e -> e.getCompanyName().equals("YYKJ") && e.getType().equalsIgnoreCase(OriginType.Issue_Invoice.value))
 				.collect(Collectors.toList());
 
 		return list;
 	}
 
-	@GetMapping("/fromExcel")
-	public List<Origin> fromExcel() {
-		List<Origin> list = readDataFromExcel.readWorkbook("CHKJ", new File("C:\\Users\\pzr\\Desktop\\创和origin .xlsx"));
+	@GetMapping("/fromExcel/{companyName}")
+	public List<Origin> fromExcel(@PathVariable("companyName") String companyName) {
+		List<Origin> list = readDataFromExcel.readWorkbook(companyName, new File("C:\\Users\\pzr\\Desktop\\宜源origin .xlsx"));
 		service.saveAll(list);
 		return list;
 	}
 
 	@GetMapping("/preriod/origin")
 	public List<Origin> getOriginInPreriod(@RequestParam(value = "companyName") String companyName,
-			@RequestParam(value = "begin", defaultValue = "2018-09-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
-			@RequestParam(value = "end", defaultValue = "2018-09-30") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+			@RequestParam(value = "begin", defaultValue = "2019-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+			@RequestParam(value = "end", defaultValue = "2019-12-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
 	
 		List<Origin> origins = service.getInPeriod(companyName, begin, end);
-		origins = origins.stream().filter(e -> e.getType().contains("Bank")).collect(Collectors.toList());
+		origins = origins.stream().filter(e -> e.getType().contains(OriginType.Receive_Invoice.value)).collect(Collectors.toList());
 		origins = process.setCompanyName(companyName).preProcessOrigin(origins);
 
-		try {
-			new DefaultBeansToXLSTransform<Origin>(Origin.class).createWorkbook(origins)
-					.write(new File("C:\\Users\\pzr\\Desktop\\preOrigin-创和.xlsx"));
-		} catch (IOException e1) {
-			
-			e1.printStackTrace();
-		}
+		/*
+		 * try { new
+		 * DefaultBeansToXLSTransform<Origin>(Origin.class).createWorkbook(origins)
+		 * .write(new File("C:\\Users\\pzr\\Desktop\\preOrigin-创和.xlsx")); } catch
+		 * (IOException e1) {
+		 * 
+		 * e1.printStackTrace(); }
+		 */
 
 		return origins;
 	}
 
 	@GetMapping("/preriod/record")
 	public List<JinDieRecord> getRecordInPreriod(
-			@RequestParam(value = "companyName", defaultValue = "CHKJ") String companyName,
-			@RequestParam(value = "begin", defaultValue = "2018-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
-			@RequestParam(value = "end", defaultValue = "2018-10-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+			@RequestParam(value = "companyName", defaultValue = "YYKJ") String companyName,
+			@RequestParam(value = "begin", defaultValue = "2019-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+			@RequestParam(value = "end", defaultValue = "2019-01-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
 		
-		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.Issue_Invoice.value);
+		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.Handle_VTA.value);
 
-		process.recordWriteToFile("C:\\Users\\pzr\\Desktop\\record-创和.xlsx", records);
+		process.recordWriteToFile("C:\\Users\\pzr\\Desktop\\record-宜源.xlsx", records);
 
 		return records;
 	}

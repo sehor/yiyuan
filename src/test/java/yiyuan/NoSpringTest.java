@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.junit.Test;
 
@@ -36,11 +37,17 @@ public class NoSpringTest {
 	
 	@Test
 	public void test2() {
-		Map<String,Double> map=new HashMap<>();
-		map.put("a",23.0);
-		Double b=map.get("a")!=null?map.get("a"):0;
-		
-		pt(b);
+	 List<Integer> list=new ArrayList<>();
+	 list.add(1);
+	 list.add(2);
+	 List<Integer> list2=new ArrayList<>();
+	 list2.add(3);
+	 list2.add(4);
+
+	 list.stream().filter(e->e>2).collect(Collectors.toList());
+	 
+	 pt(list);
+		 
 	}
 
 	

@@ -22,13 +22,13 @@ public interface OriginService {
 	@CacheEvict(value = "origin", allEntries = true)
 	void deleteOrigin(String id);
 
-	@Cacheable("origin")
+	//@Cacheable("origin")
 	List<Origin> getAll();
 
 	@CacheEvict(value = "origin", allEntries = true)
 	List<Origin> saveAll(List<Origin> origins);
 
-	@Cacheable(value="origin")
+	//@Cacheable(value="origin")
 	List<Origin> getInPeriod(String companyName, LocalDate begin, LocalDate end);
 
 	@CacheEvict(value = "origin", allEntries = true)
