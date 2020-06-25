@@ -710,10 +710,12 @@ public class OriginProcessImpl implements OriginProcess {
 			jy_record.set科目代码(classficationService.getNumByMutilName("应交税费-教育费附加", companyName));
 
 			JinDieRecord dfjy_record = createRecord(origin);
-			dfjy_record.set借方金额(vatMount -cj_record.get借方金额()-jy_record.get借方金额());
+			//dfjy_record.set借方金额(vatMount *this.DFJY_Tax_Rate); //借贷有误差
+			dfjy_record.set借方金额(origin.getAmout()-vatMount-cj_record.get借方金额()-jy_record.get借方金额());//借贷有误差,在地方教育附加调整
 			dfjy_record.set科目名称("地方教育费附加");
 			dfjy_record.set科目代码(classficationService.getNumByMutilName("应交税费-地方教育费附加", companyName));
 
+			
 			jinDieRecords.addAll(List.of(vta_record, cj_record, jy_record, dfjy_record));
 
 		}
@@ -740,7 +742,8 @@ public class OriginProcessImpl implements OriginProcess {
 			jy_record.set科目代码(classficationService.getNumByMutilName("应交税费-教育费附加", companyName));
 
 			JinDieRecord dfjy_record = createRecord(origin);
-			dfjy_record.set借方金额(amout * this.DFJY_Tax_Rate / rate);
+			//dfjy_record.set借方金额(amout * this.DFJY_Tax_Rate / rate);
+			dfjy_record.set借方金额(origin.getAmout()-cj_record.get借方金额()-jy_record.get借方金额());//借贷有误差,在地方教育附加调整
 			dfjy_record.set科目名称("地方教育费附加");
 			dfjy_record.set科目代码(classficationService.getNumByMutilName("应交税费-地方教育费附加", companyName));
 
@@ -943,6 +946,7 @@ public class OriginProcessImpl implements OriginProcess {
 
 	public void recordWriteToFile(String path, List<JinDieRecord> records) {
 
+		preWriteToFile(records);
 		HSSFWorkbook workbook = new DefaultBeansToXLSTransform<JinDieRecord>(JinDieRecord.class)
 				.createWorkbook(records);
 		File file = new File(path);
@@ -970,6 +974,20 @@ public class OriginProcessImpl implements OriginProcess {
 					e.printStackTrace();
 				}
 			}
+	}
+	
+	
+	private void preWriteToFile(List<JinDieRecord> records) {
+		 records.forEach(e->{
+			 if(e.get摘要().length()>10) {
+				 e.set摘要(e.get摘要().substring(0,10));
+			 }else if(e.get摘要().isBlank()) {
+				 e.set摘要("摘要");
+			 }
+			 double debit=e.get借方金额()==null?0:e.get借方金额();
+			 double credit=e.get贷方金额()==null?0:e.get贷方金额();
+			 e.set原币金额(debit+credit);
+		 });
 	}
 
 }

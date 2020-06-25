@@ -97,6 +97,7 @@ OriginProcess originProcess;
 				return records;
 	}
 	
+
 	private void sortRecords(List<JinDieRecord> records) {
 		records.sort((o1,o2)->{
 			int diff1 = o1.get凭证号() - o2.get凭证号(), diff2 = o1.get分录序号() - o2.get分录序号();
