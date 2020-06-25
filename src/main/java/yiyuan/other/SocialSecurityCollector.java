@@ -7,6 +7,8 @@ import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFRow;
@@ -32,8 +34,6 @@ public class SocialSecurityCollector implements Visitor {
 		if (file.getName().contains("缴交明细")) {
 			HSSFWorkbook workbook = null;
 			FileInputStream inputStream = null;
-			String prfix="60039449缴交明细";
-			int dateLength=6;
 			try {
 				inputStream = new FileInputStream(file);
 				workbook = new HSSFWorkbook(inputStream);
@@ -41,11 +41,18 @@ public class SocialSecurityCollector implements Visitor {
 				Origin record = new Origin();
 				record.setType(OriginType.Accrued_SalaryAndSecurity.value);
 				
-				String dateString=file.getName().substring(prfix.length(), prfix.length()+dateLength);
-				record.setOccur_date(LocalDate.parse(dateString+"26",DateTimeFormatter.ofPattern("yyyyMMdd")));
+				
+				HSSFCell cell_date=sheet.getRow(2).getCell(0); //日期在第二行第0列
+				String dateString=cell_date.getStringCellValue();
+				Matcher matcher=Pattern.compile("\\d+").matcher(dateString);
+				String date_s="";
+				while(matcher.find()) {
+					date_s=date_s+dateString.substring(matcher.start(),matcher.end());
+				}
+				record.setOccur_date(LocalDate.parse(date_s+"26",DateTimeFormatter.ofPattern("yyyyMMdd")));
+				
 				
 				int searchColumnIndex=1;
-				
 				for(int rowIndex=25;rowIndex<=50;rowIndex++) {       //从26行开始，在第二列搜
 					
 					if(sheet.getRow(rowIndex)==null) continue;

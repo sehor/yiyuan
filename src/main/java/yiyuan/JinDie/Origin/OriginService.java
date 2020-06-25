@@ -33,4 +33,12 @@ public interface OriginService {
 
 	@CacheEvict(value = "origin", allEntries = true)
 	List<Origin> deleteByCompanyName(String companyName);
+	
+    double findSalary(String companyName, LocalDate begin, LocalDate end);
+	
+	double findPersonSecurity(String companyName, LocalDate begin, LocalDate end);
+	
+	double findPersonTax(String companyName, LocalDate begin, LocalDate end);
+	
+	double findPersonFund(String companyName, LocalDate begin, LocalDate end); //个人公积金
 }

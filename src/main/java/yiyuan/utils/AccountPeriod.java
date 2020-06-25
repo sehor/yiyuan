@@ -7,6 +7,10 @@ import java.time.temporal.TemporalAdjusters;
 public class AccountPeriod {
 
 	private LocalDate date;
+	
+	public AccountPeriod(LocalDate date) {
+		this.date=LocalDate.of(date.getYear(), date.getMonth(), 1);
+	}
 
 	public AccountPeriod(int year, int month) {
 

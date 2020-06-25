@@ -88,8 +88,9 @@ public class OriginController {
 			@RequestParam(value = "end", defaultValue = "2019-12-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
 	
+	
 		List<Origin> origins = service.getInPeriod(companyName, begin, end);
-		origins = origins.stream().filter(e -> e.getType().contains(OriginType.Receive_Invoice.value)).collect(Collectors.toList());
+		//origins = origins.stream().filter(e -> e.getRelative_account().contains("深圳市宜源科技有限公司的保证金")).collect(Collectors.toList());
 		origins = process.setCompanyName(companyName).preProcessOrigin(origins);
 
 		/*
@@ -111,11 +112,30 @@ public class OriginController {
 			@RequestParam(value = "end", defaultValue = "2019-01-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
 		
-		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.Handle_VTA.value);
+		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.Bill.value);
 
 		process.recordWriteToFile("C:\\Users\\pzr\\Desktop\\record-宜源.xlsx", records);
 
 		return records;
+	}
+	
+	
+	@GetMapping("/preriod/salary")
+	public double getSalaryInPreriod(
+			@RequestParam(value = "companyName", defaultValue = "YYKJ") String companyName,
+			@RequestParam(value = "begin", defaultValue = "2019-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+			@RequestParam(value = "end", defaultValue = "2019-01-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+
+		return service.findSalary(companyName, begin, end);
+	}
+	
+	@GetMapping("/preriod/security")
+	public double getSecurityInPreriod(
+			@RequestParam(value = "companyName", defaultValue = "YYKJ") String companyName,
+			@RequestParam(value = "begin", defaultValue = "2019-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+			@RequestParam(value = "end", defaultValue = "2019-01-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+
+		return service.findPersonSecurity(companyName, begin, end);
 	}
 
 }

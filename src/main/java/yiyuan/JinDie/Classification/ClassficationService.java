@@ -13,7 +13,7 @@ public interface ClassficationService {
 	@Cacheable("classfication")
 	Classfication addClassfication(Classfication classfication);
 	
-	@Cacheable("classfication")
+	//@Cacheable("classfication")
 	Classfication getClassfication(String id);
 
 	@CachePut(value = "classfication",key="#result.id")
@@ -34,13 +34,13 @@ public interface ClassficationService {
 	
 	List<Classfication> getAll();
 	
-	@Cacheable("classfication")
+	//@Cacheable("classfication")
 	public String getNumber(String name,String companyName,String rootName);
 	
-	@Cacheable("classfication")
+	//@Cacheable("classfication")
 	public List<Classfication> getAllByName(String name,String companyName);
 	
-	@Cacheable("classfication")
+	//@Cacheable("classfication")
 	public String getNumber(List<Classfication> classfications,String companyName,String rootAccountName);
 	
 	public String createMutilName(Classfication classfication);

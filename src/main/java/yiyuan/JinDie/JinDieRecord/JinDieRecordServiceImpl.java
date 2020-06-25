@@ -65,9 +65,9 @@ OriginProcess originProcess;
 			
 		return records;
 	}
-	
-	
 	public List<JinDieRecord> processToRecords(LocalDate begin, LocalDate end,String companyName,String type){
+	
+	
 		
 		
 		// TODO Auto-generated method stub
@@ -81,13 +81,10 @@ OriginProcess originProcess;
 						
 						List<Origin> origins=originService.getInPeriod(companyName, currentBegin, currentEnd);
 						
-						origins=origins.stream().filter(e->e.getType().contains(type)).collect(Collectors.toList()); //type过滤
-						
-						
+						//origins=origins.stream().filter(e->e.getRelative_account().equals("深圳市宜源科技有限公司的保证金")).collect(Collectors.toList()); //type过滤
+
 						origins=originProcess.setCompanyName(companyName).preProcessOrigin(origins);
-						
-						
-						
+								
 						List<JinDieRecord> recordsInOnePreriod=originProcess.setCompanyName(companyName).proccessToRecord(origins, currentEnd);
 						sortRecords(recordsInOnePreriod);
 						records.addAll(recordsInOnePreriod);

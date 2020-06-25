@@ -57,6 +57,28 @@ OriginRepository repository;
 		return repository.deleteByCompanyName(companyName);
 	}
 	
+	@Override
+	public double findSalary(String companyName, LocalDate begin, LocalDate end) {
+		// TODO Auto-generated method stub
+		return repository.findSalary(companyName, begin, end);
+	}
+	@Override
+	public double findPersonSecurity(String companyName, LocalDate begin, LocalDate end) {
+		// TODO Auto-generated method stub
+		return repository.findPersonSecurity(companyName, begin, end);
+	}
+	
+	@Override
+	public double findPersonTax(String companyName, LocalDate begin, LocalDate end) {
+		// TODO Auto-generated method stub
+		return repository.findPersonTax(companyName, begin, end);
+	}
+	@Override
+	public double findPersonFund(String companyName, LocalDate begin, LocalDate end) {
+		// TODO Auto-generated method stub
+		return repository.findPersonFund(companyName, begin, end);
+	}
+	
 
 	
 }

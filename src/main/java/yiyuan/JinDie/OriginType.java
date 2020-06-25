@@ -17,8 +17,10 @@ public enum OriginType {
 	BanK_DefChargePerson(117,"Bank_Pay_DefChargePersion"),
 	
 	Issue_Invoice(200, "Issue_Invoice"), Receive_Invoice(300, "Receive_Invoice"), Handle_VTA(400, "Handle_VTA"),
-	Accrued_SalaryAndSecurity(500, "Accrued_SalaryAndSecurity");
+	Accrued_SalaryAndSecurity(500, "Accrued_SalaryAndSecurity"),
 
+	Bill_Income(601,"Bill_Income"),Bill_Pay(602,"Bill_Pay"),
+	Bill(600,"Bill");
 	
 	public final int key;
 	public final String value;

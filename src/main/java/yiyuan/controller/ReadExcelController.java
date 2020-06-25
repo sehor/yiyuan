@@ -21,7 +21,7 @@ public class ReadExcelController {
 	
 	@GetMapping("/socialSecurity")
 	public List<Origin> readSecurityFiles(@RequestParam("companyName") String companyName){
-		FileStructure fileStructure=new FileStructure("D:\\work\\finace\\yy");
+		FileStructure fileStructure=new FileStructure("D:\\work\\finace\\yy\\社保");
 		SocialSecurityCollector visitor=new SocialSecurityCollector();
 		fileStructure.handle(visitor);
 		List<Origin> origins=visitor.getRecords();
