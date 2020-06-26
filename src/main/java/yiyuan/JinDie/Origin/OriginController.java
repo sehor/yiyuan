@@ -1,23 +1,33 @@
 package yiyuan.JinDie.Origin;
 
+import java.io.File;
+import java.time.LocalDate;
+import java.util.Collection;
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.websocket.server.PathParam;
+
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import io.swagger.annotations.Api;
 import yiyuan.JinDie.OriginType;
 import yiyuan.JinDie.JinDieRecord.JinDieRecord;
 import yiyuan.JinDie.JinDieRecord.JinDieRecordService;
-import yiyuan.utils.msofficetools.DefaultBeansToXLSTransform;
 import yiyuan.utils.msofficetools.ExcelUtil;
 import yiyuan.utils.msofficetools.OriginProcess;
 import yiyuan.utils.msofficetools.ReadDataFromExcel;
-
-import java.io.File;
-import java.io.IOException;
-import java.time.LocalDate;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "Origin 接口测试")
 @RestController
@@ -50,11 +60,11 @@ public class OriginController {
 		return service.updateOrigin(origin);
 	}
 
-	@DeleteMapping("/delete/{companyName}")
-	public List<Origin> delete(@PathVariable("companyName") String companyName) {
+	@DeleteMapping("/delete/{id}")
+	public String delete(@PathVariable("id") String id) {
 
-		List<Origin> list = service.deleteByCompanyName(companyName);
-		return list;
+		 service.deleteOrigin(id);
+		return "done!delete by id: "+id;
 	}
 
 	@GetMapping("/all/{companyName}")
@@ -69,7 +79,7 @@ public class OriginController {
 	public List<Origin> operations() {
 		List<Origin> list = service.getAll();
 		list = list.stream().filter(
-				e -> e.getCompanyName().equals("YYKJ") && e.getType().equalsIgnoreCase(OriginType.Issue_Invoice.value))
+				e -> e.getCompanyName().equals("TADKJ") && e.getType().equalsIgnoreCase(OriginType.Issue_Invoice.value))
 				.collect(Collectors.toList());
 
 		return list;
@@ -77,7 +87,7 @@ public class OriginController {
 
 	@GetMapping("/fromExcel/{companyName}")
 	public List<Origin> fromExcel(@PathVariable("companyName") String companyName) {
-		List<Origin> list = readDataFromExcel.readWorkbook(companyName, new File("C:\\Users\\pzr\\Desktop\\宜源origin .xlsx"));
+		List<Origin> list = readDataFromExcel.readWorkbook(companyName, new File("C:\\Users\\pzr\\Desktop\\泰安达origin .xlsx"));
 		service.saveAll(list);
 		return list;
 	}
@@ -107,14 +117,14 @@ public class OriginController {
 
 	@GetMapping("/preriod/record")
 	public List<JinDieRecord> getRecordInPreriod(
-			@RequestParam(value = "companyName", defaultValue = "YYKJ") String companyName,
+			@RequestParam(value = "companyName", defaultValue = "TADKJ") String companyName,
 			@RequestParam(value = "begin", defaultValue = "2019-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
 			@RequestParam(value = "end", defaultValue = "2019-01-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
 		
 		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.Bill.value);
 
-		process.recordWriteToFile("C:\\Users\\pzr\\Desktop\\record-宜源.xlsx", records);
+		process.recordWriteToFile("C:\\Users\\pzr\\Desktop\\record-泰安达.xlsx", records);
 
 		return records;
 	}
@@ -122,7 +132,7 @@ public class OriginController {
 	
 	@GetMapping("/preriod/salary")
 	public double getSalaryInPreriod(
-			@RequestParam(value = "companyName", defaultValue = "YYKJ") String companyName,
+			@RequestParam(value = "companyName", defaultValue = "TADKJ") String companyName,
 			@RequestParam(value = "begin", defaultValue = "2019-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
 			@RequestParam(value = "end", defaultValue = "2019-01-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
@@ -131,11 +141,24 @@ public class OriginController {
 	
 	@GetMapping("/preriod/security")
 	public double getSecurityInPreriod(
-			@RequestParam(value = "companyName", defaultValue = "YYKJ") String companyName,
+			@RequestParam(value = "companyName", defaultValue = "TADKJ") String companyName,
 			@RequestParam(value = "begin", defaultValue = "2019-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
 			@RequestParam(value = "end", defaultValue = "2019-01-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
 		return service.findPersonSecurity(companyName, begin, end);
 	}
 
+	@GetMapping("/account")
+	
+	public Collection<String> getRelativeAccount(@PathParam("companyName") String companyName,@PathParam("type") String type){
+		List<Origin> origins=ExcelUtil.filter(service.getAll(), e->e.getCompanyName().equals(companyName)&&e.getType()!=null&&e.getType().contains(type));
+		
+		Collection<String> set=new HashSet<>();
+		origins.forEach(e->set.add(e.getRelative_account()));
+		
+		
+		return set;
+	}
+	
+	
 }

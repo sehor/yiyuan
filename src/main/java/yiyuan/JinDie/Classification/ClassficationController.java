@@ -50,7 +50,7 @@ public class ClassficationController {
 	
 	@GetMapping("/fromExcel/{companyName}")
 	public List<Classfication> fromExcel(@PathVariable("companyName") String companyName){
-		  File file=new File("C:\\Users\\pzr\\Desktop\\宜源科目列表.xlsx");
+		  File file=new File("C:\\Users\\pzr\\Desktop\\泰安达科目列表.xlsx");
 		  List<Classfication> classfications=service.fromExcel(file);	
 		  for(Classfication classfication:classfications) {
 			   classfication.setCompanyName(companyName);

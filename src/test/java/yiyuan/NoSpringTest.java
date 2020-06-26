@@ -1,17 +1,12 @@
 package yiyuan;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
 import org.junit.Test;
-
-import yiyuan.JinDie.Origin.Origin;
-import yiyuan.utils.Tool;
 
 public class NoSpringTest {
 
@@ -40,14 +35,13 @@ public class NoSpringTest {
 
 	@Test
 	public void test2() {
-
-		String s="2016年";
-		Pattern pattern=Pattern.compile("(\\d+)(年)");
-		Matcher matcher=pattern.matcher(s);
-		if(matcher.matches()) {
-			pt(matcher.group(1));
-		}
-		
+      Collection<String> set=new HashSet<>();
+      set.add("a");
+      set.add("b");
+      set.add("a");
+      
+      pt(set.toString());
+        
 	}
 
 	private void pt(Object o) {

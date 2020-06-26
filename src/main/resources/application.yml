@@ -17,13 +17,15 @@ config-1-attributes:
 props:
 
   Keyword:
-     bankTax: 协议扣税|缴税
+     bankTax: 协议扣税|缴税|代理国库税收收缴
        
-     bankFee: 手续费|收费项目|短信服务费|收费|网银服务费
+     bankFee: 手续费|收费项目|短信服务费|收费|网银服务费|对账单打印收费|回单服务费|企业网银年费|费用2218|对公收费
 
      bankSecurity: 社保|社会保险|社保费
 
      bankSalary: 工资|发放工资
+     
+     bankHPFund: 公积金|住房公积金
        
      bankExpense: 报销|报销费用
      
@@ -74,4 +76,16 @@ props:
         DefaultVTARate: 0.13
         personSecurityAmout: 421
         defChargePerson: 郑茂
+        
+     TADKJ: 
+        name: 深圳市泰安达电子有限公司 
+        cost: 140501
+        cj: 222108
+        jyf: 222113
+        yfgz: 221101
+        dfjyf: 222114
+        bankFee: 560303
+        DefaultVTARate: 0.13
+        personSecurityAmout: 421
+        defChargePerson: 徐邵武   
       

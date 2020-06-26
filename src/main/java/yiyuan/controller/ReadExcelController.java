@@ -21,7 +21,7 @@ public class ReadExcelController {
 	
 	@GetMapping("/socialSecurity")
 	public List<Origin> readSecurityFiles(@RequestParam("companyName") String companyName){
-		FileStructure fileStructure=new FileStructure("D:\\work\\finace\\yy\\社保");
+		FileStructure fileStructure=new FileStructure("D:\\work\\finace\\tad\\社保");
 		SocialSecurityCollector visitor=new SocialSecurityCollector();
 		fileStructure.handle(visitor);
 		List<Origin> origins=visitor.getRecords();
@@ -34,7 +34,7 @@ public class ReadExcelController {
 	
 	@GetMapping("/VAT")
 	public List<Origin> readVATFiles(@RequestParam("companyName") String companyName){
-		FileStructure fileStructure=new FileStructure("D:\\work\\finace\\yy");
+		FileStructure fileStructure=new FileStructure("D:\\work\\finace\\tad");
 		VATCollector visitor=new VATCollector();
 		fileStructure.handle(visitor);
 		

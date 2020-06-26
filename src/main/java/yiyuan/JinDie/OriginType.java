@@ -14,7 +14,7 @@ public enum OriginType {
 	Bank_Pay_SocialSecurity(111, "Bank_Pay_SocialSecurity"), Bank_Pay_BankFee(112, "Bank_Pay_BankFee"),
 	Bank_Pay_OtherPayable(113, "Bank_Pay_OtherPayable"), Bank_Pay_Other(114, "Bank_Pay_Other"),Bank_Pay_OtherReceivable(115,"Bank_Pay_OtherReceivable"),
 	Bank_Pay_Receivable(116,"Bank_Pay_Receivable"),
-	BanK_DefChargePerson(117,"Bank_Pay_DefChargePersion"),
+	BanK_DefChargePerson(117,"Bank_Pay_DefChargePersion"),Bank_Pay_Housing_Provident_Fund(118,"Bank_Pay_Housing_Provident_Fund"),
 	
 	Issue_Invoice(200, "Issue_Invoice"), Receive_Invoice(300, "Receive_Invoice"), Handle_VTA(400, "Handle_VTA"),
 	Accrued_SalaryAndSecurity(500, "Accrued_SalaryAndSecurity"),

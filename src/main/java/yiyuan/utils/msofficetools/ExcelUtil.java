@@ -156,6 +156,7 @@ public class ExcelUtil {
 	}
     
 	public static <T> List<T> filter(List<T> list,Predicate<T> predicate){
+		if(list.size()<1) return List.of();
     	list=list.stream().filter(predicate).collect(Collectors.toList());
 		return list;	
     }
