@@ -377,20 +377,20 @@ public class OriginProcessImpl implements OriginProcess {
 				JinDieRecord record_fund = createRecord(origin);
 				record_fund.set摘要("计提公积金");
 				record_fund.set借方金额(person_fund);// 单位等于个人
-				record_fund.set科目名称("公积金费用");
-				record_fund.set科目代码(getAccountNum("公积金费用"));
+				record_fund.set科目名称("住房公积金费用（单位）");
+				record_fund.set科目代码(getAccountNum("住房公积金费用（单位）"));
 
 				JinDieRecord record_fund1 = createRecord(origin);
 				record_fund1.set摘要("计提公积金");
 				record_fund1.set贷方金额(person_fund); // 单位等于个人
-				record_fund1.set科目名称("应交公积金（个人）");
-				record_fund1.set科目代码(getAccountNum("应交公积金（个人）"));
+				record_fund1.set科目名称("应交住房公积金（个人）");
+				record_fund1.set科目代码(getAccountNum("应交住房公积金（个人）"));
 
 				JinDieRecord record_fund2 = createRecord(origin);
 				record_fund2.set摘要("计提公积金");
 				record_fund2.set贷方金额(person_fund); // 单位等于
-				record_fund2.set科目名称("应交公积金（单位）");
-				record_fund2.set科目代码(getAccountNum("应交公积金（单位）"));
+				record_fund2.set科目名称("应交住房公积金（单位）");
+				record_fund2.set科目代码(getAccountNum("应交住房公积金（单位）"));
 				records.addAll(List.of(record_fund, record_fund1, record_fund2));
 			}
 

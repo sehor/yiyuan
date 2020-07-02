@@ -147,4 +147,10 @@ public class ClassficationServiceImpl implements ClassficationService {
 		return classfications.get(0).get编码();
 	}
 
+	@Override
+	public List<Classfication> getByCompanyname(String companyName) {
+		// TODO Auto-generated method stub
+		return repository.findByCompanyName(companyName);
+	}
+
 }

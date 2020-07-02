@@ -1,16 +1,17 @@
 package yiyuan.JinDie.Classification;
 
 import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiImplicitParam;
-import io.swagger.annotations.ApiOperation;
-import io.swagger.annotations.ApiResponse;
+import yiyuan.utils.Tool;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
+
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 @Api(tags = "Classfication 接口测试")
@@ -48,22 +49,36 @@ public class ClassficationController {
 		return "delete classfication by id :" + id;
 	}
 	
-	@GetMapping("/fromExcel/{companyName}")
-	public List<Classfication> fromExcel(@PathVariable("companyName") String companyName){
-		  File file=new File("C:\\Users\\pzr\\Desktop\\泰安达科目列表.xlsx");
+	@GetMapping("/fromExcel")
+	public List<Classfication> fromExcel(HttpServletResponse response){
+		String filePath="C:/Users/pzr/Desktop/TADKJ-科目列表.xlsx";
+		File file=new File(filePath);
+		if(!file.getName().contains(Tool.getCurrentCompanyName())) {
+			PrintWriter pw;
+			try {
+				pw = response.getWriter();
+				pw.write("error! the file:"+file.getName()+" seems not like the current username:"+Tool.getCurrentCompanyName());
+				pw.flush();
+				pw.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		  
 		  List<Classfication> classfications=service.fromExcel(file);	
 		  for(Classfication classfication:classfications) {
-			   classfication.setCompanyName(companyName);
+			   classfication.setCompanyName(Tool.getCurrentCompanyName());
 			   classfication.setId(classfication.get编码());
 		  }
 		  service.SaveAll(classfications);
 		  return classfications;
 	}
 	
-	@GetMapping("/initMutilName/{companyName}")
-	public String initMutilname(@PathVariable("companyName") String companyName) {
+	@GetMapping("/initMutilName")
+	public String initMutilname() {
 		
-		service.initMutilName(service.getAll());
+		service.initMutilName(service.getByCompanyname(Tool.getCurrentCompanyName()));
 		return "done";
 	}
 		

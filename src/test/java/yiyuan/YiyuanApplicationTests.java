@@ -21,6 +21,7 @@ import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.mongodb.core.MongoOperations;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.test.context.junit4.SpringRunner;
 
 
@@ -33,6 +34,12 @@ import yiyuan.JinDie.Origin.Origin;
 import yiyuan.JinDie.Origin.OriginService;
 import yiyuan.other.FileStructure;
 import yiyuan.other.VATCollector;
+import yiyuan.security.menu.Menu;
+import yiyuan.security.menu.MenuService;
+import yiyuan.security.role.Role;
+import yiyuan.security.role.RoleService;
+import yiyuan.security.user.User;
+import yiyuan.security.user.UserService;
 import yiyuan.utils.CompanyProperties;
 import yiyuan.utils.msofficetools.BeansToXLSTransform;
 import yiyuan.utils.msofficetools.DefaultBeansToXLSTransform;
@@ -126,15 +133,47 @@ public class YiyuanApplicationTests {
 		 pt(false);
 	}
 	
-	@Test
+	//@Test
 	public void cacheTest() {
 		
 		claService.getByName("银行存款");
 		
 	}
 	
+	@Autowired
+	UserService userService;
+	@Autowired
+	RoleService roleService;
+	@Autowired
+	MenuService menuService;
+	@Test
+	public void securitTest() {
+		//Menu menu=new Menu();
+		//menu.setPattern("*/admin");
+		//Menu sMenu=menuService.addMenu(menu);
+		
+		/*
+		 * Role role=new Role(); role.setName("Admin"); role.setNameZh("管理员");
+		 * role.setMenus(List.of(sMenu));
+		 * 
+		 * Role sRole=roleService.addRole(role);
+		 * 
+		 * 
+		 * User user=new User();
+		 * 
+		 * user.setUsername("kitty"); user.setPassword("kitty");
+		 * user.setEmail("kitty'sEmail@123.com"); user.setPhone("kitty12345");
+		 * user.setRoles(List.of(sRole)); userService.addUser(user);
+		 */
+		BCryptPasswordEncoder bc=new BCryptPasswordEncoder();
+		User user=(User) userService.loadUserByUsername("kitty");
+		user.setPassword(bc.encode("kitty"));
+		User sUser=userService.addUser(user);
+		pt(sUser);
+		
+	}
 	
-	
+
 	
 	private void pt(Object o) {
 		System.out.println(o.toString());

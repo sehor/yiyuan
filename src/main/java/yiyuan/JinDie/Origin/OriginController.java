@@ -1,12 +1,15 @@
 package yiyuan.JinDie.Origin;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.LocalDate;
 import java.util.Collection;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.websocket.server.PathParam;
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +24,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.sun.net.httpserver.HttpServer;
+
 import io.swagger.annotations.Api;
 import yiyuan.JinDie.OriginType;
 import yiyuan.JinDie.JinDieRecord.JinDieRecord;
 import yiyuan.JinDie.JinDieRecord.JinDieRecordService;
+import yiyuan.utils.Tool;
 import yiyuan.utils.msofficetools.ExcelUtil;
 import yiyuan.utils.msofficetools.OriginProcess;
 import yiyuan.utils.msofficetools.ReadDataFromExcel;
@@ -85,10 +91,24 @@ public class OriginController {
 		return list;
 	}
 
-	@GetMapping("/fromExcel/{companyName}")
-	public List<Origin> fromExcel(@PathVariable("companyName") String companyName) {
-		List<Origin> list = readDataFromExcel.readWorkbook(companyName, new File("C:\\Users\\pzr\\Desktop\\泰安达origin .xlsx"));
-		service.saveAll(list);
+	@GetMapping("/fromExcel/")
+	public List<Origin> fromExcel(HttpServletResponse response){
+		String filePath="C:/Users/pzr/Desktop/TADKJorigin .xlsx";
+		File file=new File(filePath);
+		if(!file.getName().contains(Tool.getCurrentCompanyName())) {
+			PrintWriter pw;
+			try {
+				pw = response.getWriter();
+				pw.write("error! the file:"+file.getName()+" seems not like the current username:"+Tool.getCurrentCompanyName());
+				pw.flush();
+				pw.close();
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+		}
+		List<Origin> list = readDataFromExcel.readWorkbook(Tool.getCurrentCompanyName(), file);
+		//service.saveAll(list);
 		return list;
 	}
 
@@ -148,6 +168,15 @@ public class OriginController {
 		return service.findPersonSecurity(companyName, begin, end);
 	}
 
+	@GetMapping("/preriod/fund")
+	public double getFundInPreriod(
+			@RequestParam(value = "companyName", defaultValue = "TADKJ") String companyName,
+			@RequestParam(value = "begin", defaultValue = "2019-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
+			@RequestParam(value = "end", defaultValue = "2019-01-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
+
+		return service.findPersonFund(companyName, begin, end);
+	}
+	
 	@GetMapping("/account")
 	
 	public Collection<String> getRelativeAccount(@PathParam("companyName") String companyName,@PathParam("type") String type){

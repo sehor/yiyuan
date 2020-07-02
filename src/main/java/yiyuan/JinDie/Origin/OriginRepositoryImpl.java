@@ -61,12 +61,11 @@ public class OriginRepositoryImpl implements OriginDataHelper {
 	@Override
 	public double findPersonTax(String companyName, LocalDate begin, LocalDate end) {
 		// TODO Auto-generated method stub
-		Query query = Query.query(Criteria.where("companyName").is(companyName).and("occur_date").gte(begin).lte(end)
-				.and("brief").regex("\\w*个人所得税\\w*"));
+		Query query = Query.query(Criteria.where("companyName").is(companyName).and("occur_date").gte(begin).lte(end));
 
 		List<Origin> origins = mongos.find(query, Origin.class);
 		double sum = 0;
-		for (Origin origin : origins) {
+		for (Origin origin : ExcelUtil.filter(origins, e->(e.getBank_brief1()+e.getBank_brief2()).contains("个人所得税"))) {
 			sum += origin.getBank_pay();
 		}
 
@@ -76,12 +75,11 @@ public class OriginRepositoryImpl implements OriginDataHelper {
 	@Override
 	public double findPersonFund(String companyName, LocalDate begin, LocalDate end) {
 		// TODO Auto-generated method stub
-		Query query = Query.query(Criteria.where("companyName").is(companyName).and("occur_date").gte(begin).lte(end)
-				.and("brief").regex("\\w*公积金\\w*"));
+		Query query = Query.query(Criteria.where("companyName").is(companyName).and("occur_date").gte(begin).lte(end));
 
 		List<Origin> origins = mongos.find(query, Origin.class);
 		double sum = 0;
-		for (Origin origin : origins) {
+		for (Origin origin : ExcelUtil.filter(origins, e->(e.getBank_brief1()+e.getBank_brief2()).contains("公积金"))) {
 			sum += origin.getBank_pay() / 2; // 一般是单位个人各一半
 		}
 

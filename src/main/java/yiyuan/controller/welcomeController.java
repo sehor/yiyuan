@@ -20,6 +20,7 @@ import yiyuan.service.SaleRecordService;
 import yiyuan.service.YiyuanService;
 import yiyuan.utils.CompanyProperties;
 import yiyuan.utils.TXMachinesProperties;
+import yiyuan.utils.Tool;
 import yiyuan.utils.msofficetools.OriginProcess;
 import yiyuan.utils.msofficetools.ReadDataFromExcel;
 
@@ -104,5 +105,10 @@ public class welcomeController {
 		//System.out.println(companyProperties.getName());
 		return companyProperties;
 		
+	}
+	
+	@GetMapping("/user")
+	public Object userInfor() {
+		return Tool.getCurrentCompanyName();
 	}
 }

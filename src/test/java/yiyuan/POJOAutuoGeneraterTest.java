@@ -29,17 +29,24 @@ public class POJOAutuoGeneraterTest {
 
     */
 
-        AutoJOPO autoJOPO = new AutoJOPO("JinDieRecord", "yiyuan.JinDie.JinDieRecord","mongo");
+        AutoJOPO autoJOPO = new AutoJOPO("User", "yiyuan.security.user","mongo");
         autoJOPO
                 .addField("private", "String", "id")
-                .addField("private", "LocalDate", "日期")
-                .addField("private", "String", "凭证字")
-                .addField("private", "Integer", "凭证号")
-                .addField("private", "Integer", "分录序号")
-                .addField("private", "String", "摘要")
-                .addField("private", "String", "科目代码")
-                .addField("private", "Float", "借方金额")
-                .addField("private", "Float", "贷方金额")
+                .addField("private", "String", "username")
+                .addField("private", "String", "password")
+                .addField("private", "String", "email")
+                .addField("private", "String", "phone")
+              
+               
+                
+               // .addField("private", "String", "nameZh")
+                //.addField("private", "String", "凭证字")
+               // .addField("private", "Integer", "凭证号")
+               // .addField("private", "Integer", "分录序号")
+               // .addField("private", "String", "摘要")
+               // .addField("private", "String", "科目代码")
+               // .addField("private", "Float", "借方金额")
+               // .addField("private", "Float", "贷方金额")
                 
 				/*
 				 * .addField("private", "String", "parentId") .addField("private", "LocalDate",

@@ -8,7 +8,9 @@ import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.springframework.security.core.context.SecurityContextHolder;
 import yiyuan.JinDie.Origin.Origin;
+import yiyuan.security.user.User;
 
 public class Tool {
 
@@ -46,5 +48,11 @@ public class Tool {
 		List<Origin> cList = new ArrayList<>();
 		list.forEach(e->cList.add(e.clone()));
 		return cList;
+	}
+	
+	public static String getCurrentCompanyName() {
+		User user=(User)SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+		
+		return user.getUsername();
 	}
 }
