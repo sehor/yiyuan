@@ -6,10 +6,26 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+
+import org.aspectj.lang.annotation.Before;
 import org.junit.Test;
+
+import yiyuan.JinDie.Origin.Origin;
 
 public class NoSpringTest {
 
+	private Person person1;
+	private Person person2;
+	private Person person3;
+	
+	@org.junit.Before
+	public void beforetest() {
+		
+		  person1=new Person("tom", 13);
+		  person2=new Person("gerry",14);
+		  person3=new Person("bob",15);
+	}
+	
 	// @Test
 	public void test1() {
 
@@ -33,16 +49,7 @@ public class NoSpringTest {
 		pt(list);
 	}
 
-	@Test
-	public void test2() {
-      Collection<String> set=new HashSet<>();
-      set.add("a");
-      set.add("b");
-      set.add("a");
-      
-      pt(set.toString());
-        
-	}
+
 
 	private void pt(Object o) {
 

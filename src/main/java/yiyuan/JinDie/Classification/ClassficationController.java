@@ -51,7 +51,7 @@ public class ClassficationController {
 	
 	@GetMapping("/fromExcel")
 	public List<Classfication> fromExcel(HttpServletResponse response){
-		String filePath="C:/Users/pzr/Desktop/TADKJ-科目列表.xlsx";
+		String filePath="C:/Users/pzr/Desktop/YYKJ-科目列表.xlsx";
 		File file=new File(filePath);
 		if(!file.getName().contains(Tool.getCurrentCompanyName())) {
 			PrintWriter pw;
@@ -60,6 +60,7 @@ public class ClassficationController {
 				pw.write("error! the file:"+file.getName()+" seems not like the current username:"+Tool.getCurrentCompanyName());
 				pw.flush();
 				pw.close();
+				return null;
 			} catch (IOException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
@@ -92,6 +93,7 @@ public class ClassficationController {
 	public List<Classfication> getAll(@PathVariable("companyName") String companyName){
 		
 		return service.getAll().stream().filter(e->e.getCompanyName().equalsIgnoreCase(companyName)).collect(Collectors.toList());
+		//return service.getAll();
 		
 	}
 	

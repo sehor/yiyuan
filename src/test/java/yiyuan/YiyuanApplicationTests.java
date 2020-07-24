@@ -176,6 +176,7 @@ public class YiyuanApplicationTests {
 
 	
 	private void pt(Object o) {
+	
 		System.out.println(o.toString());
 	}
 }

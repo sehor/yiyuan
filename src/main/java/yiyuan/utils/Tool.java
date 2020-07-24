@@ -9,7 +9,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.security.core.context.SecurityContextHolder;
-import yiyuan.JinDie.Origin.Origin;
+
+import jinDieEntryXLS.beans.Origin;
 import yiyuan.security.user.User;
 
 public class Tool {

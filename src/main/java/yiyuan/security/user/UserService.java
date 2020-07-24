@@ -1,5 +1,7 @@
 package yiyuan.security.user;
 
+import java.util.List;
+
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 
@@ -15,4 +17,6 @@ public interface UserService {
 	void deleteUser(String id);
 	
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException;
+	
+	List<User> findAll();
 }

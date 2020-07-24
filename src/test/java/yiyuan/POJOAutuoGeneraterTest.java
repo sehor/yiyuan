@@ -29,15 +29,13 @@ public class POJOAutuoGeneraterTest {
 
     */
 
-        AutoJOPO autoJOPO = new AutoJOPO("User", "yiyuan.security.user","mongo");
+        AutoJOPO autoJOPO = new AutoJOPO("BeanName", "yiyuan.testResult","mongo");
         autoJOPO
                 .addField("private", "String", "id")
                 .addField("private", "String", "username")
-                .addField("private", "String", "password")
-                .addField("private", "String", "email")
-                .addField("private", "String", "phone")
+
               
-               
+ 
                 
                // .addField("private", "String", "nameZh")
                 //.addField("private", "String", "凭证字")

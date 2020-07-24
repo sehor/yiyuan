@@ -24,11 +24,13 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.sun.net.httpserver.HttpServer;
 
+
+import excelTool.ExcelTool;
 import io.swagger.annotations.Api;
+import jinDieEntryXLS.beans.accountEntry.Record;
 import yiyuan.JinDie.OriginType;
-import yiyuan.JinDie.JinDieRecord.JinDieRecord;
+
 import yiyuan.JinDie.JinDieRecord.JinDieRecordService;
 import yiyuan.utils.Tool;
 import yiyuan.utils.msofficetools.ExcelUtil;
@@ -136,15 +138,15 @@ public class OriginController {
 	}
 
 	@GetMapping("/preriod/record")
-	public List<JinDieRecord> getRecordInPreriod(
+	public List<Record> getRecordInPreriod(
 			@RequestParam(value = "companyName", defaultValue = "TADKJ") String companyName,
 			@RequestParam(value = "begin", defaultValue = "2019-01-01") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate begin,
 			@RequestParam(value = "end", defaultValue = "2019-01-31") @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate end) {
 
 		
-		List<JinDieRecord> records = recordService.processToRecords(begin, end, companyName, OriginType.Bill.value);
+		List<Record> records = recordService.processToRecordsFromDataBase(begin, end, companyName);
 
-		process.recordWriteToFile("C:\\Users\\pzr\\Desktop\\record-泰安达.xlsx", records);
+		new ExcelTool<Record>().writeToFile(records, "C:\\Users\\pzr\\Desktop\\records-YYKJ.xlsx");
 
 		return records;
 	}
@@ -168,6 +170,7 @@ public class OriginController {
 		return service.findPersonSecurity(companyName, begin, end);
 	}
 
+	
 	@GetMapping("/preriod/fund")
 	public double getFundInPreriod(
 			@RequestParam(value = "companyName", defaultValue = "TADKJ") String companyName,
@@ -177,8 +180,8 @@ public class OriginController {
 		return service.findPersonFund(companyName, begin, end);
 	}
 	
-	@GetMapping("/account")
 	
+	@GetMapping("/account")
 	public Collection<String> getRelativeAccount(@PathParam("companyName") String companyName,@PathParam("type") String type){
 		List<Origin> origins=ExcelUtil.filter(service.getAll(), e->e.getCompanyName().equals(companyName)&&e.getType()!=null&&e.getType().contains(type));
 		

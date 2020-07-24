@@ -3,20 +3,32 @@ package yiyuan.utils.msofficetools;
 import org.apache.poi.hpsf.DocumentSummaryInformation;
 import org.apache.poi.hpsf.SummaryInformation;
 import org.apache.poi.hssf.usermodel.*;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.FillPatternType;
 import org.apache.poi.ss.usermodel.IndexedColors;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
+import yiyuan.utils.Tool;
+
+import static org.hamcrest.CoreMatchers.containsString;
+
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Field;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
-public class DefaultBeansToXLSTransform<T> implements BeansToXLSTransform {
+public class DefaultBeansToXLSTransform<T> implements BeansToXLSTransform<T> {
 	public final int DEFAULT_HEAD_ROW_INDEX = 0;
 	public final int DEFAULT_DATA_BEGIN_ROW = 1;
 	public final int DEFAULT_SHEET_INDEX = 0;
@@ -24,7 +36,7 @@ public class DefaultBeansToXLSTransform<T> implements BeansToXLSTransform {
 
 	private Field[] fields;
 
-	public DefaultBeansToXLSTransform(Class cls) {
+	public DefaultBeansToXLSTransform(Class<T> cls) {
 		this.fields = cls.getDeclaredFields();
 	}
 
@@ -47,7 +59,7 @@ public class DefaultBeansToXLSTransform<T> implements BeansToXLSTransform {
 	}
 
 	@Override
-	public HSSFWorkbook createWorkbook(List beans) {
+	public HSSFWorkbook createWorkbook(List<T> beans) {
 		HSSFWorkbook workbook = new HSSFWorkbook();
 
 		initWorkbook(workbook);
@@ -57,7 +69,7 @@ public class DefaultBeansToXLSTransform<T> implements BeansToXLSTransform {
 		// 创建日期显示格式
 		HSSFCellStyle dateCellStyle = workbook.createCellStyle();
 		dateCellStyle.setDataFormat(HSSFDataFormat.getBuiltinFormat("m/d/yy"));
-
+		
 		int rowIndex = DEFAULT_DATA_BEGIN_ROW;
 
 		// 取得列数
@@ -71,6 +83,7 @@ public class DefaultBeansToXLSTransform<T> implements BeansToXLSTransform {
 			HSSFRow row = sheet.createRow(rowIndex);
 			for (int i = 0; i < columnNum; i++) {
 				HSSFCell cell = row.createCell(i);
+				
 				Field field = fieldColumnMap.get(i);
 
 				field.setAccessible(true);
@@ -108,6 +121,8 @@ public class DefaultBeansToXLSTransform<T> implements BeansToXLSTransform {
 			rowIndex++;
 
 		}
+		
+		
 
 		return workbook;
 	}
@@ -153,20 +168,20 @@ public class DefaultBeansToXLSTransform<T> implements BeansToXLSTransform {
 		for (int i = 0; i < columnTitles.length; i++) {
 			HSSFCell cell = headRow.createCell(i);
 			cell.setCellValue(columnTitles[i]);
+			cell.setCellStyle(headerStyle);
 		}
 
 	}
 
-	private Field[] getFields() {
 
-		return null;
-	}
 
 	@Override
-	public void writeToFile(String fileName, List list) {
+	public void writeToFile(String fileName, List<T> list) {
 		// TODO Auto-generated method stub
 		File file = new File(fileName);
-
+		OutputStream output = null;
+		HSSFWorkbook workbook = createWorkbook(list);
+		stripe(workbook);
 		if (!file.exists())
 			try {
 				file.createNewFile();
@@ -174,15 +189,57 @@ public class DefaultBeansToXLSTransform<T> implements BeansToXLSTransform {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-		
+
 		try {
-			createWorkbook(list).write(file);
+			output = new FileOutputStream(file);
+			workbook.write(output);
+
+			workbook.close();
+			output.close();
+
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 	}
-	
-	
+
+	private void stripe(HSSFWorkbook workbook) {
+		HSSFSheet sheet = workbook.getSheetAt(DEFAULT_SHEET_INDEX);
+		int flag = -1;
+		HSSFCellStyle style = (HSSFCellStyle) workbook.createCellStyle();
+		style.setFillForegroundColor(IndexedColors.GREY_25_PERCENT.index);
+		style.setFillPattern(FillPatternType.SOLID_FOREGROUND);
+        
+		for (int rowIndex = DEFAULT_DATA_BEGIN_ROW; rowIndex <= sheet.getPhysicalNumberOfRows(); rowIndex++) {
+			HSSFRow row = sheet.getRow(rowIndex);
+			if (row == null)
+				continue;
+			
+			
+			if (rowIndex>DEFAULT_DATA_BEGIN_ROW) {    //遇到不同类的，变换flag;
+				String preStr=ExcelUtil.getCellValueByCell(sheet.getRow(rowIndex-1).getCell(2))+
+						ExcelUtil.getCellValueByCell(sheet.getRow(rowIndex-1).getCell(0));
+				
+				String currentStr=ExcelUtil.getCellValueByCell(row.getCell(2))+
+						ExcelUtil.getCellValueByCell(row.getCell(0));
+				
+				if(!preStr.equals(currentStr)) {
+					flag = flag * -1;
+				}
+				
+			}
+			if (flag == 1) {
+				
+				for (int columnIndex = 0; columnIndex <= row.getLastCellNum(); columnIndex++) {
+					HSSFCell cell = row.getCell(columnIndex);
+					if (cell == null)
+						continue;
+					cell.setCellStyle(style);
+					
+				}
+
+			}
+		}
+	}
 
 }

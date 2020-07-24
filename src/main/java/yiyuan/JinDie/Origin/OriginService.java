@@ -1,5 +1,6 @@
 package yiyuan.JinDie.Origin;
 
+import java.io.File;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -41,4 +42,9 @@ public interface OriginService {
 	double findPersonTax(String companyName, LocalDate begin, LocalDate end);
 	
 	double findPersonFund(String companyName, LocalDate begin, LocalDate end); //个人公积金
+	
+	List<Origin> getFromFile(File file,String companyName);
+	List<Origin> getFromFilePath(String filePath,String companyName);
+	
+	List<jinDieEntryXLS.beans.Origin> originToSubcalss(List<Origin> origins);
 }

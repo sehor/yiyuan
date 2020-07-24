@@ -6,6 +6,7 @@ import org.springframework.cache.annotation.EnableCaching;
 
 @EnableCaching
 @SpringBootApplication
+//@ComponentScan(basePackages = {"yiyuan","jinDieEntryXLS"})
 public class YiyuanApplication {
 
 	public static void main(String[] args) {
