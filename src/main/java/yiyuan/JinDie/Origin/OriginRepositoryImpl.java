@@ -23,6 +23,14 @@ public class OriginRepositoryImpl implements OriginDataHelper {
 
 		return mongos.find(query, Origin.class);
 	}
+	
+	@Override
+	public List<Origin> findInPeriod(String companyName, LocalDate begin, LocalDate end,String typeString) {
+		// TODO Auto-generated method stub
+		Query query = Query.query(Criteria.where("companyName").is(companyName).and("type").regex(typeString).and("occur_date").gte(begin).lte(end));
+
+		return mongos.find(query, Origin.class);
+	}
 
 	@Override
 	public double findSalary(String companyName, LocalDate begin, LocalDate end) {

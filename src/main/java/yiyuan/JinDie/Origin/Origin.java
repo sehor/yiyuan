@@ -7,7 +7,7 @@ import io.swagger.annotations.ApiModel;
 
 @Table(name = "origin")
 @ApiModel(value = "", description = "")
-public class Origin extends jinDieEntryXLS.beans.Origin {
+public class Origin extends jinDieEntryXLS.beans.RawInfo {
 
 	/**
 	 * 

@@ -9,12 +9,14 @@ import java.time.temporal.TemporalAdjusters;
 import java.util.ArrayList;
 import java.util.List;
 
+
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 
+import jinDieEntryXLS.beans.RawInfo;
 import yiyuan.JinDie.OriginType;
-import yiyuan.JinDie.Origin.Origin;
+
 
 public class VATCollector implements Visitor {
 
@@ -78,13 +80,13 @@ public class VATCollector implements Visitor {
 		this.currentDirname = director.getName();
 	}
 	
-	public List<Origin> convertToOrigin(List<VATRecord> records){
+	public List<RawInfo> convertToOrigin(List<VATRecord> records){
 		
-		List<Origin> origins=new ArrayList<>();
+		List<RawInfo> origins=new ArrayList<>();
 		records.forEach(e->{		
 			if(e.get应交税款()>0.01) {
 				System.out.println(e.getDate()+" 应交税款："+e.get应交税款()+"   累计进项："+e.get累计进项税额()+"  累计应交税款："+e.get累计应交税款());
-				Origin origin=new Origin();
+				RawInfo origin=new RawInfo();
 				LocalDate date=LocalDate.parse(e.getDate()+"01", DateTimeFormatter.ofPattern("yyyyMMdd"));
 				
 				origin.setOccur_date(date.with(TemporalAdjusters.lastDayOfMonth()));

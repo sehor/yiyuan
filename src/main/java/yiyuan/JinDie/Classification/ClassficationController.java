@@ -14,6 +14,8 @@ import javax.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
+import excelTool.ExcelTool;
+
 @Api(tags = "Classfication 接口测试")
 @RestController
 @RequestMapping("/Classfication")
@@ -51,7 +53,7 @@ public class ClassficationController {
 	
 	@GetMapping("/fromExcel")
 	public List<Classfication> fromExcel(HttpServletResponse response){
-		String filePath="C:/Users/pzr/Desktop/YYKJ-科目列表.xlsx";
+		String filePath="D:/work/finace/"+Tool.getCurrentCompanyName()+"/"+Tool.getCurrentCompanyName()+"_科目列表.xls";
 		File file=new File(filePath);
 		if(!file.getName().contains(Tool.getCurrentCompanyName())) {
 			PrintWriter pw;
@@ -66,8 +68,11 @@ public class ClassficationController {
 				e.printStackTrace();
 			}
 		}
+		
+		  ExcelTool<Classfication> excelTool=new ExcelTool<>();
+
+		  List<Classfication> classfications=excelTool.readFromFileName(Classfication.class, filePath);
 		  
-		  List<Classfication> classfications=service.fromExcel(file);	
 		  for(Classfication classfication:classfications) {
 			   classfication.setCompanyName(Tool.getCurrentCompanyName());
 			   classfication.setId(classfication.get编码());
@@ -76,13 +81,7 @@ public class ClassficationController {
 		  return classfications;
 	}
 	
-	@GetMapping("/initMutilName")
-	public String initMutilname() {
-		
-		service.initMutilName(service.getByCompanyname(Tool.getCurrentCompanyName()));
-		return "done";
-	}
-		
+
 	@GetMapping("/all")
 	public List<Classfication> getAll(){
 		

@@ -17,6 +17,7 @@ public class ClassficationServiceImpl implements ClassficationService {
 
 	@Override
 	public Classfication addClassfication(Classfication classfication) {
+        classfication.setCompanyName(createMutilName(classfication));
 		return repository.save(classfication);
 	}
 
@@ -49,7 +50,9 @@ public class ClassficationServiceImpl implements ClassficationService {
 	@Override
 	public void SaveAll(List<Classfication> classfications) {
 		// TODO Auto-generated method stub
-		repository.saveAll(classfications);
+		List<Classfication> savies=repository.saveAll(classfications);
+		savies.forEach(e->e.setMutilName(createMutilName(e)));
+		repository.saveAll(savies);
 	}
 
 	@Override
@@ -131,14 +134,7 @@ public class ClassficationServiceImpl implements ClassficationService {
 		return parentName + "-" + classfication.get名称();
 	}
 
-	@Override
-	public void initMutilName(List<Classfication> classfications) {
-		classfications.forEach(e -> {
-              e.setMutilName(createMutilName(e));
-		});
-		
-		repository.saveAll(classfications);
-	}
+	
 
 	@Override
 	public String getNumByMutilName(String mutilName,String companyName){

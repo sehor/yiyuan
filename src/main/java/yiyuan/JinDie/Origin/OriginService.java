@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 
+import jinDieEntryXLS.beans.RawInfo;
+
 public interface OriginService {
 	@CacheEvict(value = "origin", allEntries = true)
 	Origin addOrigin(Origin origin);
@@ -31,6 +33,9 @@ public interface OriginService {
 
 	//@Cacheable(value="origin")
 	List<Origin> getInPeriod(String companyName, LocalDate begin, LocalDate end);
+	
+	//@Cacheable(value="origin")
+	List<Origin> getInPeriod(String companyName, LocalDate begin, LocalDate end,String typeString);
 
 	@CacheEvict(value = "origin", allEntries = true)
 	List<Origin> deleteByCompanyName(String companyName);
@@ -46,5 +51,8 @@ public interface OriginService {
 	List<Origin> getFromFile(File file,String companyName);
 	List<Origin> getFromFilePath(String filePath,String companyName);
 	
-	List<jinDieEntryXLS.beans.Origin> originToSubcalss(List<Origin> origins);
+	List<RawInfo> originToSupClass(List<Origin> origins);
+	
+	List<RawInfo> getExpenseOriginFromFile(File file,String companyName);
+	
 }

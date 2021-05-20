@@ -45,8 +45,6 @@ public interface ClassficationService {
 	
 	public String createMutilName(Classfication classfication);
 	
-	public void initMutilName(List<Classfication> classfications);
-	
 	public String getNumByMutilName(String mutilName,String companyName);
 
 	List<Classfication> getByCompanyname(String currentCompanyName);

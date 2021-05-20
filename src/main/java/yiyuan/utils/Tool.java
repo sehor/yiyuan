@@ -7,10 +7,12 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.springframework.security.core.context.SecurityContextHolder;
 
-import jinDieEntryXLS.beans.Origin;
+import jinDieEntryXLS.beans.RawInfo;
 import yiyuan.security.user.User;
 
 public class Tool {
@@ -45,8 +47,8 @@ public class Tool {
 	}
 	
 	
-	public static List<Origin> cloneOrigins(List<Origin> list){
-		List<Origin> cList = new ArrayList<>();
+	public static List<RawInfo> cloneOrigins(List<RawInfo> list){
+		List<RawInfo> cList = new ArrayList<>();
 		list.forEach(e->cList.add(e.clone()));
 		return cList;
 	}
@@ -56,4 +58,26 @@ public class Tool {
 		
 		return user.getUsername();
 	}
+	
+	
+	public static List<String> getMatchers(String reg,String search){
+		List<String> strs=new ArrayList<>();
+		Pattern pattern=Pattern.compile(reg);
+		Matcher matcher=pattern.matcher(search);
+		
+	   //注意 返回的是group1；
+		while(matcher.find()) {
+			strs.add(matcher.group(1));
+		}
+			
+		return strs;
+		
+	}
+	
+	public static String getMatcher(String reg,String search) {
+		
+		List<String> strs=getMatchers(reg, search);
+		return strs.size()>0?strs.get(0):"";
+	}
+	
 }

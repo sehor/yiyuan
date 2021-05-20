@@ -34,9 +34,16 @@ public class OriginReader implements Reader<Origin>{
 			sOrigins=helper.getBeans(sheet);
 			
 			for(Origin origin:sOrigins) {
-				origin.setType(sheet.getSheetName()); // type暂时先设为sheet名
+				String type=sheet.getSheetName().startsWith("Bank")?"Bank":sheet.getSheetName(); //多家银行，把银行编号去掉
+				
+				origin.setType(type); // type暂时先设为sheet名
 				origin.setId(companyName + sheet.getSheetName() + origin.getSerial_number()); // 设置id 公司名+sheet名+序号	
 				origin.setCompanyName(companyName);
+				
+				//有多家银行
+				if(sheet.getSheetName().contains("Bank_")) {
+					origin.setBankNum(getBankNum(sheet.getSheetName()));
+				}
 			}
 
 			origins.addAll(sOrigins);
@@ -49,4 +56,8 @@ public class OriginReader implements Reader<Origin>{
 	
 	
 
+	private String getBankNum(String sheetName) {
+		
+		return sheetName.replaceAll("Bank_", "");
+	}
 }
